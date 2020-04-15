@@ -6,13 +6,14 @@ class Block {
         this.name = name;
         this.amount = amount;
         this.nonce = 0;
-        this.timestamp = (new Date()).toString();
-        this.hash = this.hasher();
+        this.timestamp = (new Date()).toString();        
         this.prevHash = prevHash;
+        this.hash = this.hasher();
     }
     mineBlock(difficulty) {
         console.log("Mining started");
-        while (this.hash.substr(0, difficulty) != Array(difficulty + 1).join("0")) {
+        while (this.hash.substr(5, difficulty) != Array(difficulty + 1).join("0")) {
+        //while (!this.hash.includes("000111")) {
             this.nonce++;
             this.hash = this.hasher();
             //console.log(this.hash);

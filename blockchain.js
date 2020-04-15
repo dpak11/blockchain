@@ -14,16 +14,36 @@ class BlockChain {
         return this.chain[this.chain.length - 1];
     }
 
-    addBlock(name,amt) {
-        console.log("Waiting to add Block:");
-        let newBlock = new Block(this.lastBlock().index+1, name, amt, this.lastBlock().hash);        
-        newBlock.mineBlock(this.difficulty);
-        if (newBlock.prevHash !== this.lastBlock().hash) {
-            console.log("prev hash Not matching")
+    isValid(newBlock) {
+        for (let i = 0; i < this.chain.length; i++) {
+            if (this.chain[i].hash !== this.chain[i].hasher()) {
+                return false
+            }
+            let nextblock = this.chain[i + 1];
+            if (nextblock) {
+                if (this.chain[i].hash !== nextblock.prevHash) {
+                    return false
+                }
+
+            }
+        }
+        if(this.lastBlock().hash !== newBlock.prevHash){
             return false
         }
-        this.chain.push(newBlock);
         return true;
+    }
+
+    addBlock(name, amt) {
+        console.log("Waiting to add Block:");
+        let newBlock = new Block(this.lastBlock().index + 1, name, amt, this.lastBlock().hash);
+        if(this.isValid(newBlock)){
+            newBlock.mineBlock(this.difficulty);
+            this.chain.push(newBlock);
+            console.log("Mining Complete. Block added to chain");
+            console.log("============================")
+        }else{
+            console.log("Invalid Blockchain")
+        }
     }
 }
 
