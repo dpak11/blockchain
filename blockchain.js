@@ -36,15 +36,17 @@ class BlockChain {
     addBlock(name, amt) {
         console.log("Waiting to add Block:");
         let newBlock = new Block(this.lastBlock().index + 1, name, amt, this.lastBlock().hash);
-        if(this.isValid(newBlock)){
-            newBlock.mineBlock(this.difficulty);
-            this.chain.push(newBlock);
-            console.log("Mining Complete. Block added to chain");
-            console.log("============================")
-        }else{
-            console.log("Invalid Blockchain")
-        }
+        //if(this.isValid(newBlock)){
+        newBlock.mineBlock(this.difficulty);
+        this.chain.push(newBlock);
+        console.log("Mining Complete. Block added to chain");
+        console.log("============================")
+        /*}else{
+            console.log("Invalid Blockchain");
+            return 
+        }*/
     }
+    
 }
 
 module.exports = BlockChain;
