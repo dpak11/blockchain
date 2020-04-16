@@ -9,7 +9,8 @@ class BlockChain {
 
     }
     createGenesis() {
-        const genesisBlock = new Block(1, "Genesis Block", 100, null, null, null, this.MASTER_KEY);
+        const newdata = {name:"Genesis Block", amount: 100};
+        const genesisBlock = new Block(1, newdata, null, null, null, this.MASTER_KEY);
         genesisBlock.hasher();
         this.chain.push(genesisBlock);
     }
@@ -48,8 +49,8 @@ class BlockChain {
         return true;
     }
 
-    addBlock(index, name, amt, nonce, time, hash, prevhash, startMining = true) {
-        let newBlock = new Block(index, name, amt, nonce, time, hash, this.MASTER_KEY, prevhash);
+    addBlock(index, userdata, nonce, time, hash, prevhash, startMining = true) {
+        let newBlock = new Block(index, userdata, nonce, time, hash, this.MASTER_KEY, prevhash);
         if (startMining) {
             newBlock.mineBlock(this.difficulty);
             console.log("Mining Complete");

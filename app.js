@@ -10,7 +10,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MASTER_KEY = keys.MASTERKEY;
-const myBlockchain = new BlockChain(4,MASTER_KEY);
+const difficultyLevel = 4;
+let myBlockchain = new BlockChain(difficultyLevel, MASTER_KEY);
 
 
 // Show all Blocks from in a BlockChain
@@ -23,36 +24,45 @@ app.get("/blockchain", (req, res) => {
     res.send({ blockchain: blocks });
 });
 
-// Add new Block into BlockChain.
-// Input Data: "name" and "amount"
+
+
+// Add new Block into BlockChain using input data 'name' and 'amount'
 
 app.post("/blockdata", (req, res) => {
     const { name, amount } = req.body;
-    myBlockchain.addBlock(myBlockchain.lastBlock().index + 1, name, amount, null, null, null, myBlockchain.lastBlock().hash);
+    if (!name || !amount) {
+        return res.send("Required 'name', 'amount'");
+    }
+    let inputData = { name, amount };
+    myBlockchain.addBlock(myBlockchain.lastBlock().index + 1, inputData, null, null, null, myBlockchain.lastBlock().hash);
     res.send(myBlockchain.lastBlock().getBlock())
 });
 
 
-// POST raw JSON data that contains all Blocks
+// Input will be raw JSON data containing BlockChain.
+// Testing purpose: The Output (JSON) from GET request > "/blockchain" api will be the input for this (POST request)
+// Try making small changes to this JSON. You get BlockChain Corrupt error message
 
 app.post("/blockchain", (req, res) => {
     const blockchain_json = req.body.blockchain;
     if (!Array.isArray(blockchain_json)) {
-        return res.send("Blockchain not found");
+        return res.send("Error: Blockchain not found");
     }
-    const tempBlockChain = new BlockChain(4, MASTER_KEY);
+    const tempBlockChain = new BlockChain(difficultyLevel, MASTER_KEY);
     tempBlockChain.chain = [];
     for (let i = 0; i < blockchain_json.length; i++) {
-    	const bchain = blockchain_json[i];
-    	if(typeof bchain !== "object"){
-    		return res.send("Blockchain not found");
-    	}
-        tempBlockChain.addBlock(bchain.index, bchain.name, bchain.amount, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false);
+        const bchain = blockchain_json[i];
+        if (typeof bchain !== "object") {
+            return res.send("Error: Blockchain not found");
+        }
+        let userData = { name: bchain.name, amount: bchain.amount };
+        tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false);
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
-            return res.send("BlockChain corrupt")
+            return res.send("Error: BlockChain corrupt")
         }
     }
-    res.send("Blocks Added:" + blockchain_json.length)
+    myBlockchain = tempBlockChain;
+    res.send("Total Blocks Added to BlockChain: " + tempBlockChain.chain.length)
 
 });
 
