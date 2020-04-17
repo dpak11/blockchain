@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MASTER_KEY = keys.MASTERKEY;
-const difficultyLevel = 4;
+const difficultyLevel = 3;
 let myBlockchain = new BlockChain(difficultyLevel, MASTER_KEY);
 
 

@@ -12,7 +12,7 @@ Aim is to build a decentralised application by distributing the `blockchain` bet
 
 	> POST request to `http://localhost:3000/blockdata`
 
-	Each block contains: block index, timestamp, `userdata`, proof of work(nonce), hash, previous block hash.
+	Each block contains: block index, timestamp, `userdata`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), hash, previous block hash.
 
 	`userdata` is an object that may contain username(or userid), amount, etc..
 
@@ -25,11 +25,11 @@ Aim is to build a decentralised application by distributing the `blockchain` bet
 	> POST request to `http://localhost:3000/blockchain`
 
 
-### Phase-2 : (Tentative)
+### Phase-2 : 
 
 - Create a Queue containing new transactions(userdata) that needs to be mined (PoW).
 
-- Maintain a database(MongoDB) containing registered BlockChain users email id.
+- Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
 
 - Manage individual blockchain users using hash verification (User password + Server Master Key).
 
