@@ -1,14 +1,14 @@
 # Blockchain (Decentralised)
 
 
-> This is a work in progress BlockChain application which is in Phase-1 of development.
+> This is a work-in-progress BlockChain Web app which has completed Phase-1 development stage.
 
 Aim is to build a decentralised application by distributing the `blockchain` between individual users, and thereby eliminating the need of a Server for storing Blockchain in any form.
 
 
 ### Phase-1 : 
 
-- Add individual blocks into block chain.
+- API to add individual blocks into block chain.
 
 	> POST request to `http://localhost:3000/blockdata`
 
@@ -16,26 +16,34 @@ Aim is to build a decentralised application by distributing the `blockchain` bet
 
 	`userdata` is an object that may contain username(or userid), amount, etc..
 
-- List all blockchains
+- API to List all blockchains
 
 	> GET request to `http://localhost:3000/blockchain`
 
-- Send raw JSON data containing all the blocks. Each block is validated before adding it to the main BlockChain
+- API to POST raw JSON data containing all the blocks. Each block is validated before attaching to the main BlockChain
 
 	> POST request to `http://localhost:3000/blockchain`
 
 
 ### Phase-2 : 
 
-- Create a Queue containing new transactions(userdata) that needs to be mined (PoW).
+- Create a Queue containing pending transactions(userdata) that needs to be mined (PoW) and added to BlockChain.
 
 - Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
 
-- Manage individual blockchain users using hash verification (User password + Server Master Key).
+- Manage individual blockchain users using hash verification.
 
 
 ### Phase-3 :
 
-Decentralisation using Socket.IO
+1) Decentralisation using Socket.IO
+
+2) For Javascript Developers: A Code block that needs to be added(integrated) into the website of the user(developer) that will automatically receive and transmit latest copy of blockchain.
+
+3) For Non-developers: Registered Users should be able to manually download a copy of latest BlockChain on click of a button. This is not required if (2) is implemented
+
+4) For Non-developers: Registered Users should also be able to upload the BlockChain into the Network. This is not required if (2) is implemented
+
+
 
 

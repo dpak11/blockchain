@@ -41,7 +41,7 @@ app.post("/blockdata", (req, res) => {
 
 // Input will be raw JSON data containing BlockChain.
 // Testing purpose: The Output (JSON) from GET request > "/blockchain" api will be the input for this (POST request)
-// Try making small changes to this JSON. You get BlockChain Corrupt error message
+// Try making small changes to this JSON, you get BlockChain rejected error message
 
 app.post("/blockchain", (req, res) => {
     const blockchain_json = req.body.blockchain;
@@ -55,14 +55,17 @@ app.post("/blockchain", (req, res) => {
         if (typeof bchain !== "object") {
             return res.send("Error: Blockchain not found");
         }
+        if (!bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
+            return res.send("Error: Invalid Blockchain");
+        }
         let userData = { name: bchain.name, amount: bchain.amount };
         tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false);
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
-            return res.send("Error: BlockChain corrupt")
+            return res.send("Error: BlockChain Rejected")
         }
     }
     myBlockchain = tempBlockChain;
-    res.send("Total Blocks Added to BlockChain: " + tempBlockChain.chain.length)
+    res.send(tempBlockChain.chain.length + " Block(s) Added to BlockChain successfuly ")
 
 });
 

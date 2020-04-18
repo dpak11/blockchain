@@ -57,7 +57,7 @@ class BlockChain {
         }
         this.chain.push(newBlock);
         console.log("Block added to chain");
-        console.log("============================")
+        console.log("---------------------")
 
     }
 
