@@ -1,9 +1,9 @@
 # Blockchain (Decentralised)
 
 
-> This is a work-in-progress BlockChain Web app which has completed Phase-1 development stage.
+A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain in any form.
 
-Aim is to build a decentralised application by distributing the `blockchain` between individual users, and thereby eliminating the need of a Server for storing Blockchain in any form.
+> This is a work-in-progress BlockChain Web app that is currently in Phase-2 development stage.
 
 
 ### Phase-1 : 
@@ -43,7 +43,3 @@ Aim is to build a decentralised application by distributing the `blockchain` bet
 3) For Non-developers: Registered Users should be able to manually download a copy of latest BlockChain on click of a button. This is not required if (2) is implemented
 
 4) For Non-developers: Registered Users should also be able to upload the BlockChain into the Network. This is not required if (2) is implemented
-
-
-
-
