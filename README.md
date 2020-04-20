@@ -38,8 +38,8 @@ A decentralised web application that distributes `blockchain` between individual
 
 1) Decentralisation using Socket.IO
 
-2) For Developers: A pience of Code that needs to be added into the website of the client/user inorder to receive and transmit latest copy of blockchain.
+2) For Developers: A piece of Code that needs to be added into the website of the client/user inorder to receive and transmit latest blockchain.
 
-3) Registered Users should be able to manually download a copy of latest BlockChain on click of a button. This is not required if (2) is implemented on the Client side
+3) Registered Users should be able to manually download a copy of latest BlockChain on clicking a button. This is not required if (2) is implemented on the Client side
 
 4) Registered Users should also be able to upload the BlockChain into the Network. This is not required if (2) is implemented on the Client side
