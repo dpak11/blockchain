@@ -11,7 +11,7 @@ class Block {
         this.hash = (hash == null) ? this.hasher() : hash
     }
     mineBlock(difficulty) {
-        console.log("Mining started");
+        console.log("Mining in progress...");
         while (this.hash.substr(1, difficulty) != Array(difficulty + 1).join("0") || !this.hash.includes("012")) {
             this.nonce++;
             this.hash = this.hasher();

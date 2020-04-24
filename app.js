@@ -1,20 +1,21 @@
 const BlockChain = require("./blockchain");
-const keys = require("./keys")
+const keys = require("./keys");
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const http = require('http').Server(app);
-const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MASTER_KEY = keys.MASTERKEY;
 const difficultyLevel = 3;
+let transactionList = [];
+let miningActive = false;
 let myBlockchain = new BlockChain(difficultyLevel, MASTER_KEY);
 
 
-// Show all Blocks from in a BlockChain
+// Show all Blocks in a BlockChain
 
 app.get("/blockchain", (req, res) => {
     let blocks = [];
@@ -34,10 +35,22 @@ app.post("/blockdata", (req, res) => {
         return res.send("Required 'name', 'amount'");
     }
     let inputData = { name, amount };
-    myBlockchain.addBlock(myBlockchain.lastBlock().index + 1, inputData, null, null, null, myBlockchain.lastBlock().hash);
-    res.send(myBlockchain.lastBlock().getBlock())
-});
+    let transactionID = (transactionList.length > 0) ? transactionList[transactionList.length - 1].id + 1 : 1;
+    let transaction = {
+        id: transactionID,
+        data: { ...inputData }
+    };
+    transactionList.push(transaction);
+    if (!miningActive) {
+        processTransaction().then(() => {
+            res.send(myBlockchain.lastBlock().getBlock())
+        });
+    } else {
+        res.send("Your Transaction ID("+transactionID + ") is added to queue");
+    }
 
+
+});
 
 // Input will be raw JSON data containing BlockChain.
 // Testing purpose: The Output (JSON) from GET request > "/blockchain" api will be the input for this (POST request)
@@ -48,6 +61,7 @@ app.post("/blockchain", (req, res) => {
     if (!Array.isArray(blockchain_json)) {
         return res.send("Error: Blockchain not found");
     }
+
     const tempBlockChain = new BlockChain(difficultyLevel, MASTER_KEY);
     tempBlockChain.chain = [];
     for (let i = 0; i < blockchain_json.length; i++) {
@@ -58,6 +72,7 @@ app.post("/blockchain", (req, res) => {
         if (!bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
             return res.send("Error: Invalid Blockchain");
         }
+
         let userData = { name: bchain.name, amount: bchain.amount };
         tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false);
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
@@ -69,8 +84,17 @@ app.post("/blockchain", (req, res) => {
 
 });
 
+function processTransaction() {
+    miningActive = true;
+    //console.log("data:: ", transactionList[0].data);
+    myBlockchain.addBlock(myBlockchain.lastBlock().index + 1, transactionList[0].data, null, null, null, myBlockchain.lastBlock().hash);
+    miningActive = false;
+    transactionList.splice(0, 1);
+    return Promise.resolve();
+}
 
-http.listen(port, () => {
-    console.log(`Server running at port ` + port);
+
+http.listen(3000, () => {
+    console.log(`Server running at port 3000 `);
 
 });
