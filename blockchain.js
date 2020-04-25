@@ -1,61 +1,58 @@
 const Block = require("./block");
 
-class BlockChain {
-    constructor(difficultyLevel, masterKey) {
-        this.chain = [];
-        this.difficulty = difficultyLevel;
-        this.MASTER_KEY = masterKey;
-        this.createGenesis();
-
-    }
-    createGenesis() {
+function BlockChain(difficultyLevel, masterKey) {
+    
+    let chain = [];
+    let difficulty = difficultyLevel;
+    let MASTER_KEY = masterKey;       
+    createGenesis();
+    
+    function createGenesis() {
         const newdata = {name:"Genesis Block", amount: 100};
-        const genesisBlock = new Block(1, newdata, null, null, null, this.MASTER_KEY);
+        const genesisBlock = Block(1, newdata, null, null, null, MASTER_KEY);
         genesisBlock.hasher();
-        this.chain.push(genesisBlock);
-    }
-    lastBlock() {
-        return this.chain[this.chain.length - 1];
+        chain.push(genesisBlock);
     }
 
-    isValid(newBlock = null) {
-        if (newBlock == null) {
-            console.log("Checking all Block hashes");
-            for (let i = 0; i < this.chain.length; i++) {
-                if (this.chain[i].hash !== this.chain[i].hasher()) {
-                    return false
-                }
-                let nextblock = this.chain[i + 1];
-                if (nextblock) {
-                    if (this.chain[i].hash !== nextblock.prevHash) {
-                        return false
-                    }
+    
 
-                }
+    return {
+        lastBlock: function() {
+            return chain[chain.length - 1];
+        },
+        addBlock: function(index, userdata, nonce, time, hash, prevhash, startMining = true) {
+            let newBlock = Block(index, userdata, nonce, time, hash, MASTER_KEY, prevhash);
+            if (startMining) {
+                newBlock.mineBlock(difficulty);
+                console.log("Mining Complete");
             }
-        } else {
+            chain.push(newBlock);
+        },
+        isValid: function(_block) {        
             console.log("Checking New Block hash");
-            if (newBlock.hash !== newBlock.hasher()) {
+            if (_block.get().hash !== _block.hasher()) {
+                /*console.log("hash Mismatch:\n"+_block.get().hash);
+                console.log({..._block.get()});
+                console.log(_block.hasher());*/
+
                 return false
             }
-            let prevblock = this.chain[this.chain.length - 2];
-            if (prevblock) {
-                if (prevblock.hash !== newBlock.prevHash) {
+            let prevblock = chain[chain.length - 2];
+            if (prevblock) {                
+                if (prevblock.get().hash !== _block.get().prevHash) {
+                    console.log("prevHash Mismatch:");
+                    console.log(prevblock.get().hash, _block.get().prevHash);
                     return false;
                 }
-            }
-
+            }            
+            return true;
+        },
+        clear: function(){
+            chain = [];
+        },
+        get: function(){
+            return chain;
         }
-        return true;
-    }
-
-    addBlock(index, userdata, nonce, time, hash, prevhash, startMining = true) {
-        let newBlock = new Block(index, userdata, nonce, time, hash, this.MASTER_KEY, prevhash);
-        if (startMining) {
-            newBlock.mineBlock(this.difficulty);
-            console.log("Mining Complete");
-        }
-        this.chain.push(newBlock);
     }
 
 }
