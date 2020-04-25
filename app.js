@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MASTER_KEY = keys.MASTERKEY;
-const difficultyLevel = 4;
+const difficultyLevel = 3;
 let transactionList = [];
 let miningActive = false;
 let myBlockchain = BlockChain(difficultyLevel, MASTER_KEY);
@@ -27,10 +27,10 @@ app.get("/blockchain", (req, res) => {
 });
 
 app.get("/transactions", (req, res) => {
-    if(transactionList.length == 0){
+    if (transactionList.length == 0) {
         return res.send("No pending transactions")
     }
-    return res.json({total_inQueue:transactionList.length, transactions:transactionList});
+    return res.json({ inQueue_total: transactionList.length, inQueue_transactions: transactionList });
 });
 
 
@@ -38,7 +38,7 @@ app.get("/transactions", (req, res) => {
 
 // Add new Block into BlockChain using input data 'name' and 'amount'
 
-app.post("/blockdata", async (req, res) => {
+app.post("/blockdata", (req, res) => {
     const { name, amount } = req.body;
     if (!name || !amount) {
         return res.send("Required 'name', 'amount'");
@@ -50,30 +50,23 @@ app.post("/blockdata", async (req, res) => {
         data: { ...inputData }
     };
     transactionList.push(transaction);
-    //let lastBlock = myBlockchain.lastBlock().get();
-    //myBlockchain.addBlock(lastBlock.index + 1, inputData, null, null, null, lastBlock.hash);
-    //return res.send(myBlockchain.lastBlock().get());
-    if (!miningActive) {
-        //console.log("processing...");
-        const new_block = await processTransaction();
-        const {index, user_data, nonce, timestamp, hash, prevHash} = new_block.updated;
-        //console.log("processTransaction Complete: ");
-        miningActive = false;
-        transactionList.splice(0, 1);
-        /*console.log("++++++++");
-        console.log(new_block);*/
-        myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining set to false
-        res.send(myBlockchain.lastBlock().get());
-
-
-    } else {
-        res.send("Your Transaction ID(" + transactionID + ") is added to queue");
-    }
+    return res.send("Your Transaction ID(" + transactionID + ") is added to queue. \nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at localhost:3000/blockchain");
 
 
 });
 
-async function doTransactions(){
+async function doTransactions() {
+    console.log("transaction started...");
+    const new_block = await processBlockChain();
+    const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
+    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining set to false
+    miningActive = false;
+    transactionList.splice(0, 1);
+    console.log("Block Added");
+    /*if(promiseResp){
+        return Promise.resolve();
+    }*/
+    return;
 
 }
 
@@ -110,11 +103,11 @@ app.post("/blockchain", (req, res) => {
 
 });
 
-function processTransaction() {
+function processBlockChain() {
     miningActive = true;
     let lastBlock = myBlockchain.lastBlock().get();
     return new Promise((resolve, reject) => {
-        const worker = new Worker('./service.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel, MASTER_KEY } });
+        const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel, MASTER_KEY } });
         worker.on('message', resolve);
         worker.on('error', reject);
         worker.on('exit', (code) => {
@@ -125,11 +118,11 @@ function processTransaction() {
 }
 
 
-let queueInterval = setInterval(function(){
-    if(transactionList.length>0 && !miningActive){
-
+let queueInterval = setInterval(function() {
+    if (transactionList.length > 0 && !miningActive) {
+        doTransactions();
     }
-},3000)
+}, 3000)
 
 http.listen(3000, () => {
     console.log(`Server running at port 3000 `);
