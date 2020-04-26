@@ -29,6 +29,8 @@ A decentralised web application that distributes `blockchain` between individual
 
 - Create a Queue containing pending transactions(userdata) that needs to be mined and sequentially added to BlockChain.
 
+	To view all pending transactions:
+
 	> GET request to `http://localhost:3000/transactions`
 
 - Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
