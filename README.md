@@ -1,9 +1,9 @@
 # Blockchain (Decentralised)
 
 
-A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain in any form.
+A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress BlockChain Web app that is currently in Phase-2 development stage.
+> This is a work-in-progress application that is currently in Phase-2 stage.
 
 
 ### Phase-1 : 
@@ -28,6 +28,8 @@ A decentralised web application that distributes `blockchain` between individual
 ### Phase-2 : 
 
 - Create a Queue containing pending transactions(userdata) that needs to be mined and sequentially added to BlockChain.
+
+	> GET request to `http://localhost:3000/transactions`
 
 - Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
 

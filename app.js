@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const MASTER_KEY = keys.MASTERKEY;
 const difficultyLevel = 3;
 let transactionList = [];
+let transactionId = 0;
 let miningActive = false;
 let myBlockchain = BlockChain(difficultyLevel, MASTER_KEY);
 
@@ -44,13 +45,13 @@ app.post("/blockdata", (req, res) => {
         return res.send("Required 'name', 'amount'");
     }
     let inputData = { name, amount };
-    let transactionID = (transactionList.length > 0) ? transactionList[transactionList.length - 1].id + 1 : 1;
+    transactionId++;
     let transaction = {
-        id: transactionID,
+        id: transactionId,
         data: { ...inputData }
     };
     transactionList.push(transaction);
-    return res.send("Your Transaction ID(" + transactionID + ") is added to queue. \nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at localhost:3000/blockchain");
+    return res.send("Your Transaction is added to Queue. Transaction ID is: " + transactionId+"\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at localhost:3000/blockchain");
 
 
 });
@@ -59,13 +60,10 @@ async function doTransactions() {
     console.log("transaction started...");
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
-    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining set to false
+    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE
     miningActive = false;
     transactionList.splice(0, 1);
     console.log("Block Added");
-    /*if(promiseResp){
-        return Promise.resolve();
-    }*/
     return;
 
 }
@@ -93,13 +91,13 @@ app.post("/blockchain", (req, res) => {
         }
 
         let userData = { name: bchain.user_data.name, amount: bchain.user_data.amount };
-        tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false);
+        tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false); // Mining is set to FALSE
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
             return res.send("Error: BlockChain Rejected")
         }
     }
     myBlockchain = tempBlockChain;
-    res.send(tempBlockChain.get().length + " Block(s) Added to BlockChain successfuly ")
+    res.send(tempBlockChain.get().length + "Blocks Added to BlockChain successfuly ")
 
 });
 
