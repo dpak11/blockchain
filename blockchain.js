@@ -28,8 +28,7 @@ function BlockChain(difficultyLevel, masterKey) {
             }
             chain.push(newBlock);
         },
-        isValid: function(_block) {        
-            console.log("Checking New Block hash");
+        isValid: function(_block) { 
             if (_block.get().hash !== _block.hasher()) {
                 return false
             }

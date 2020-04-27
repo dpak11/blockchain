@@ -1,5 +1,9 @@
 const BlockChain = require("./blockchain");
-const keys = require("./keys");
+const KEYS = require("./keys");
+const { tokie } = require('./tokie');
+// You may also use JWT instead of tokie.
+
+const { SHA256 } = require('crypto-js');
 const express = require('express');
 const { Worker } = require('worker_threads')
 const bodyParser = require('body-parser');
@@ -9,12 +13,15 @@ const http = require('http').Server(app);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MASTER_KEY = keys.MASTERKEY;
-const difficultyLevel = 3;
+const MASTER_KEY = KEYS.masterKey;
+const DIFFICULTY = 4;
+const DUMMY_DB = []; // for testing
+
 let transactionList = [];
-let transactionId = 0;
+let auto_id = 0;
 let miningActive = false;
-let myBlockchain = BlockChain(difficultyLevel, MASTER_KEY);
+let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
+
 
 
 // Show all Blocks in a BlockChain
@@ -34,7 +41,32 @@ app.get("/transactions", (req, res) => {
     return res.json({ inQueue_total: transactionList.length, inQueue_transactions: transactionList });
 });
 
+app.post("/register", (req, res) => {
+    const {email, password} = req.body;
+    if(DUMMY_DB.some(user => user.email === email)){
+        return res.send("Sorry, Email id is already registered.")
+    }
+    const hashedPass = SHA256(password).toString();
+    const userID = NEW_USER.getID();
+    const mytoken = createToken(userID,hashedPass);
+    DUMMY_DB.push({email:email, pass:hashedPass, id: userID});
+    return res.json({status:"Successfuly registered", UserID: userID, temporaryToken:mytoken, tokenValidity:"20 minutes"});
 
+});
+
+app.post("/login", (req, res) => {
+    const {userid, password} = req.body;
+    if(!DUMMY_DB.some(user => user.id == userid)){
+        return res.send("Sorry, ID not registered")
+    }
+    const hashedPass = SHA256(password).toString();
+    if(!DUMMY_DB.some(user => (user.id == userid && user.pass === hashedPass))){
+        return res.send("Sorry, invalid ID/password combination")
+    }
+    const mytoken = createToken(userid,hashedPass);
+    return res.json({temporaryToken:mytoken, tokenValidity:"20 minutes"});
+
+});
 
 
 // Add new Block into BlockChain using input data 'name' and 'amount'
@@ -45,13 +77,13 @@ app.post("/blockdata", (req, res) => {
         return res.send("Required 'name', 'amount'");
     }
     let inputData = { name, amount };
-    transactionId++;
+    auto_id++;
     let transaction = {
-        id: transactionId,
-        data: { ...inputData }
+        id: auto_id,
+        data: inputData
     };
     transactionList.push(transaction);
-    return res.send("Your Transaction is added to Queue. Transaction ID is: " + transactionId+"\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at localhost:3000/blockchain");
+    return res.send("Your Transaction is added to Queue. Transaction ID is: " + auto_id + "\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at 'localhost:3000/blockchain'");
 
 
 });
@@ -78,7 +110,7 @@ app.post("/blockchain", (req, res) => {
         return res.send("Error: Blockchain not found");
     }
 
-    const tempBlockChain = BlockChain(difficultyLevel, MASTER_KEY);
+    const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     tempBlockChain.clear();
 
     for (let i = 0; i < blockchain_json.length; i++) {
@@ -114,6 +146,45 @@ function processBlockChain() {
         })
     })
 }
+
+
+const NEW_USER = {
+    generate: function() {
+        let id = "";
+        for (let i = 0; i < 5; i++) {
+            id = `${id}${Math.floor(Math.random()*10)}`;
+        }
+        return Number(id);
+    },
+    getID: function() {
+        let newID = this.generate();
+        if(DUMMY_DB.some(user => user.userid === newID)){
+            this.get();
+        }else{
+          DUMMY_DB.push({userid:newID})
+          return newID;  
+        }        
+    }
+
+};
+
+
+function createToken(id,pswd){
+    // Token is generated using 'Tokie'. 
+    // Read more on Tokie usage here: https://github.com/dpak11/tokie
+    // Alternatively you may also use JWT.
+
+    const token = tokie.create({
+        data: { userid:id },
+        secretKey: pswd,
+        expiresIn: "20m"
+    });
+    if (token.error) {
+        return {error:token.status}
+    }
+    return token.value
+} 
+
 
 
 let queueInterval = setInterval(function() {
