@@ -27,7 +27,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 ### Phase-2 : 
 
-- Maintain a Queue(array) containing pending transactions(userdata) that will sequentially minded and added to BlockChain.
+- Maintain a Queue(array) containing pending transactions(userdata) that will get minded sequentially.
 
 	To view all pending transactions:
 

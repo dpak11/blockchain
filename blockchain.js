@@ -24,7 +24,7 @@ function BlockChain(difficultyLevel, masterKey) {
             let newBlock = Block(index, userdata, nonce, time, hash, MASTER_KEY, prevhash);
             if (startMining) {
                 newBlock.mineBlock(difficulty);
-                //console.log("Mining Complete");
+                console.log("Mining Complete");
             }
             chain.push(newBlock);
         },

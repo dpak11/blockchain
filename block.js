@@ -16,7 +16,7 @@ function Block(num, userData, _nonce, ts, _hash, master_Key, _prevHash = "0") {
 
     return {
         mineBlock: function(difficulty) {
-            //console.log("Mining in progress...");
+            console.log("Mining in progress...");
             while (hash.substr(1, difficulty) != Array(difficulty + 1).join("0") || !hash.includes("123")) {
                 nonce++;
                 hash = generateHash();

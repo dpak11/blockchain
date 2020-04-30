@@ -48,7 +48,7 @@ app.post("/register", (req, res) => {
     }
     const hashedPass = SHA256(password).toString();
     const userID = NEW_USER.getID();
-    const mytoken = createToken(userID,hashedPass);
+    const mytoken = UserTokens.create(userID);
     DUMMY_DB.push({email:email, pass:hashedPass, id: userID});
     return res.json({status:"Successfuly registered", UserID: userID, temporaryToken:mytoken, tokenValidity:"20 minutes"});
 
@@ -63,7 +63,7 @@ app.post("/login", (req, res) => {
     if(!DUMMY_DB.some(user => (user.id == userid && user.pass === hashedPass))){
         return res.send("Sorry, invalid ID/password combination")
     }
-    const mytoken = createToken(userid,hashedPass);
+    const mytoken = UserTokens.create(userid);
     return res.json({temporaryToken:mytoken, tokenValidity:"20 minutes"});
 
 });
@@ -72,7 +72,15 @@ app.post("/login", (req, res) => {
 // Add new Block into BlockChain using input data 'name' and 'amount'
 
 app.post("/blockdata", (req, res) => {
-    const { name, amount } = req.body;
+    const { name, amount, token } = req.body;
+    const tokenUser = UserTokens.read(token);
+    if(tokenUser.error){
+        return res.send(tokenUser.error)
+    }
+    if(!DUMMY_DB.some(user => user.id === tokenUser.userid)){
+        return res.send("Sorry, Invalid User")
+    }    
+
     if (!name || !amount) {
         return res.send("Required 'name', 'amount'");
     }
@@ -88,24 +96,26 @@ app.post("/blockdata", (req, res) => {
 
 });
 
-async function doTransactions() {
-    console.log("transaction started...");
-    const new_block = await processBlockChain();
-    const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
-    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE
-    miningActive = false;
-    transactionList.splice(0, 1);
-    console.log("Block Added");
-    return;
 
-}
 
 // Input will be raw JSON data containing BlockChain.
 // Testing purpose: The Output (JSON) from GET request > "/blockchain" api will be the input for this (POST request)
 // Try making small changes to this JSON, you get BlockChain rejected error message
 
 app.post("/blockchain", (req, res) => {
-    const blockchain_json = req.body.blockchain;
+    const blockchain_json = req.body.blockchain;    
+    if(!req.query.token){
+        return res.send("Token is missing")
+    }    
+
+    const tokenUser = UserTokens.read(req.query.token);
+    if(tokenUser.error){
+        return res.send(tokenUser.error)
+    }
+    if(!DUMMY_DB.some(user => user.id === tokenUser.userid)){
+        return res.send("Sorry, Invalid User")
+    }
+
     if (!Array.isArray(blockchain_json)) {
         return res.send("Error: Blockchain not found");
     }
@@ -129,15 +139,27 @@ app.post("/blockchain", (req, res) => {
         }
     }
     myBlockchain = tempBlockChain;
-    res.send(tempBlockChain.get().length + "Blocks Added to BlockChain successfuly ")
+    res.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
 
 });
+
+async function doTransactions() {
+    console.log("transaction started...");
+    const new_block = await processBlockChain();
+    const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
+    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE
+    miningActive = false;
+    transactionList.splice(0, 1);
+    console.log("Block Added");
+    return;
+
+}
 
 function processBlockChain() {
     miningActive = true;
     let lastBlock = myBlockchain.lastBlock().get();
     return new Promise((resolve, reject) => {
-        const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel, MASTER_KEY } });
+        const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel:DIFFICULTY, MASTER_KEY } });
         worker.on('message', resolve);
         worker.on('error', reject);
         worker.on('exit', (code) => {
@@ -169,21 +191,29 @@ const NEW_USER = {
 };
 
 
-function createToken(id,pswd){
-    // Token is generated using 'Tokie'. 
-    // Read more on Tokie usage here: https://github.com/dpak11/tokie
-    // Alternatively you may also use JWT.
-
-    const token = tokie.create({
-        data: { userid:id },
-        secretKey: pswd,
-        expiresIn: "20m"
-    });
-    if (token.error) {
-        return {error:token.status}
+const UserTokens = {
+    create: function(id){
+         const token = tokie.create({
+            data: { userid:id },
+            secretKey: KEYS.tokenAccess,
+            expiresIn: "15m"
+        });
+        if (token.error) {
+            return {error:token.status}
+        }
+        return token.value
+    },
+    read: function(_token){
+        const token = tokie.read({
+            secretKey: KEYS.tokenAccess,
+            tokenKey: _token
+        });
+        if (token.error) {
+            return {error:token.status}
+        }
+        return token.value
     }
-    return token.value
-} 
+}
 
 
 
