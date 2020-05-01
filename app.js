@@ -1,8 +1,6 @@
 const BlockChain = require("./blockchain");
 const KEYS = require("./keys");
-const { tokie } = require('./tokie');
-// You may also use JWT instead of tokie.
-
+const tokenManager = require("./tokenManager"); 
 const { SHA256 } = require('crypto-js');
 const express = require('express');
 const { Worker } = require('worker_threads')
@@ -21,7 +19,6 @@ let transactionList = [];
 let auto_id = 0;
 let miningActive = false;
 let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
-
 
 
 // Show all Blocks in a BlockChain
@@ -48,7 +45,7 @@ app.post("/register", (req, res) => {
     }
     const hashedPass = SHA256(password).toString();
     const userID = NEW_USER.getID();
-    const mytoken = UserTokens.create(userID);
+    const mytoken = tokenManager.createToken(userID);
     DUMMY_DB.push({email:email, pass:hashedPass, id: userID});
     return res.json({status:"Successfuly registered", UserID: userID, temporaryToken:mytoken, tokenValidity:"20 minutes"});
 
@@ -63,7 +60,7 @@ app.post("/login", (req, res) => {
     if(!DUMMY_DB.some(user => (user.id == userid && user.pass === hashedPass))){
         return res.send("Sorry, invalid ID/password combination")
     }
-    const mytoken = UserTokens.create(userid);
+    const mytoken = tokenManager.createToken(userid);
     return res.json({temporaryToken:mytoken, tokenValidity:"20 minutes"});
 
 });
@@ -73,7 +70,7 @@ app.post("/login", (req, res) => {
 
 app.post("/blockdata", (req, res) => {
     const { name, amount, token } = req.body;
-    const tokenUser = UserTokens.read(token);
+    const tokenUser = tokenManager.readToken(token);
     if(tokenUser.error){
         return res.send(tokenUser.error)
     }
@@ -99,8 +96,8 @@ app.post("/blockdata", (req, res) => {
 
 
 // Input will be raw JSON data containing BlockChain.
-// Testing purpose: The Output (JSON) from GET request > "/blockchain" api will be the input for this (POST request)
-// Try making small changes to this JSON, you get BlockChain rejected error message
+// Testing purpose: The Output (JSON) you get from GET request > "/blockchain" will be the input for this (POST request)
+// Try making small changes to the JSON, you get BlockChain error message
 
 app.post("/blockchain", (req, res) => {
     const blockchain_json = req.body.blockchain;    
@@ -108,7 +105,7 @@ app.post("/blockchain", (req, res) => {
         return res.send("Token is missing")
     }    
 
-    const tokenUser = UserTokens.read(req.query.token);
+    const tokenUser = tokenManager.readToken(req.query.token);
     if(tokenUser.error){
         return res.send(tokenUser.error)
     }
@@ -189,32 +186,6 @@ const NEW_USER = {
     }
 
 };
-
-
-const UserTokens = {
-    create: function(id){
-         const token = tokie.create({
-            data: { userid:id },
-            secretKey: KEYS.tokenAccess,
-            expiresIn: "15m"
-        });
-        if (token.error) {
-            return {error:token.status}
-        }
-        return token.value
-    },
-    read: function(_token){
-        const token = tokie.read({
-            secretKey: KEYS.tokenAccess,
-            tokenKey: _token
-        });
-        if (token.error) {
-            return {error:token.status}
-        }
-        return token.value
-    }
-}
-
 
 
 let queueInterval = setInterval(function() {
