@@ -47,3 +47,28 @@ A decentralised web application that distributes `blockchain` between individual
 3) Registered Users should be able to manually download a copy of latest BlockChain on clicking a button. However, this is not required if (2) was implemented.
 
 4) Registered Users should also be able to upload the BlockChain into the Network. However this is not required if (2) was implemented.
+
+
+---
+
+## To Test Blockchain:
+
+1) Download or clone this repository into a new directory in your Local.
+
+2) Inside the new directory, Open Windows Power Shell / Command panel and run the command `npm install`.
+
+3) After installation is complete, run the command `npm start`.
+
+4) Use a Rest API tool such as Postman to test following API's
+
+	POST `localhost:3000/register`
+
+	POST `localhost:3000/login`
+
+	GET `http://localhost:3000/transactions`
+
+	GET `localhost:3000/blockchain`
+
+	POST `localhost:3000/blockchain?token={your_token_here}`
+
+	POST `localhost:3000/blockdata`
