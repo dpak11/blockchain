@@ -56,7 +56,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 - API for User LogIn:
 
-	> POST request to `http://localhost:3000/signin`
+	> POST request to `http://localhost:3000/login`
 
 
 	![User Login API example](git_images/login.jpg)
@@ -94,7 +94,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 3) After installation is complete, run the command `npm start`.
 
-4) Use a Rest API tool such as Postman to test following API's:
+4) Use a Rest API tool such as [Postman](https://www.postman.com) to test following API's:
 
 	- First, Register with email ID and password
 
@@ -104,10 +104,10 @@ A decentralised web application that distributes `blockchain` between individual
 
 		> POST `localhost:3000/blockdata`
 
-	- So you can now check transaction status at:
+	- You can check transaction status at:
 
 		> GET `http://localhost:3000/transactions`
 
-	- Once your transaction is complete and added to blockchain, you can check updated blockchain:
+	- Once your transaction is complete and added to blockchain, you can check updated blockchain at:
 
 		> GET `localhost:3000/blockchain`
