@@ -3,7 +3,7 @@
 
 A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress application that is currently in Phase-2 stage.
+> This is a work-in-progress that is currently in Phase-2 stage.
 
 
 ### Phase-1 : 
@@ -19,15 +19,19 @@ A decentralised web application that distributes `blockchain` between individual
 
 	This will generate individual block that will have `block index`, `timestamp`, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), `hash`, `previousHash`.
 
-- API to fetch blockchain from network.
+- API to fetch latest blockchain from network.
 
 	> GET request to `http://localhost:3000/blockchain`
 
 - API to submit raw JSON data containing blockchain. Each of the block is validated before attaching it to the main BlockChain
 
+	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
+
 	![Post blockchain API example](git_images/blockchain.jpg)
 
-	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
+	In the above example we tried to POST raw JSON data containing blockchain. After validating all 3 individual blocks from JSON (but only the first 2 is visible in screenshot), it gets added to the main blockchain in the network.
+
+	
 
 	
 
@@ -50,7 +54,7 @@ A decentralised web application that distributes `blockchain` between individual
 	User input should contain email address and password. In response, you should receive an unique user ID along with a token
 
 
-- API for User Sign In:
+- API for User LogIn:
 
 	> POST request to `http://localhost:3000/signin`
 
@@ -86,20 +90,24 @@ A decentralised web application that distributes `blockchain` between individual
 
 1) Download or clone this repository into a new directory in your Local.
 
-2) Inside the new directory, Open Windows Power Shell / Command panel and run the command `npm install`.
+2) Inside the new directory, Open Windows Power Shell / Command prompt and run the command `npm install`.
 
 3) After installation is complete, run the command `npm start`.
 
-4) Use a Rest API tool such as Postman to test following API's
+4) Use a Rest API tool such as Postman to test following API's:
 
-	POST `localhost:3000/register`
+	- First, Register with email ID and password
 
-	POST `localhost:3000/login`
+		> POST `localhost:3000/register`
 
-	GET `http://localhost:3000/transactions`
+	- Next, post data: `amount` and `name` along with token
 
-	GET `localhost:3000/blockchain`
+		> POST `localhost:3000/blockdata`
 
-	POST `localhost:3000/blockchain?token={your_token_here}`
+	- So you can now check transaction status at:
 
-	POST `localhost:3000/blockdata`
+		> GET `http://localhost:3000/transactions`
+
+	- Once your transaction is complete and added to blockchain, you can check updated blockchain:
+
+		> GET `localhost:3000/blockchain`
