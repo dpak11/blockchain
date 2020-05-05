@@ -1,5 +1,5 @@
 const { tokie } = require('./tokie');
-const KEYS = require("./keys");
+const KEYS = require("../keys");
 
 module.exports = {
     createToken: function(id) {

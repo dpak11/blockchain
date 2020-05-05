@@ -12,9 +12,12 @@ A decentralised web application that distributes `blockchain` between individual
 
 	> POST request to `http://localhost:3000/blockdata`
 
-	Each block contains block index, timestamp, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), hash, previous block hash.
 
-	`user data` is an object that may contain data such as amount, id, name, sender, receiver etc..
+	![Post blockdata API example](git_images/blockdata.jpg)
+
+	User Input will contain `amount, name, token` (token is generated during Login, registeration process, refer Phase-2 below).
+
+	This will generate individual block that will have `block index`, `timestamp`, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), `hash`, `previousHash`.
 
 - API to fetch blockchain from network.
 
@@ -22,16 +25,44 @@ A decentralised web application that distributes `blockchain` between individual
 
 - API to submit raw JSON data containing blockchain. Each of the block is validated before attaching it to the main BlockChain
 
-	> POST request to `http://localhost:3000/blockchain`
+	![Post blockchain API example](git_images/blockchain.jpg)
+
+	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
+
+	
+
 
 
 ### Phase-2 : 
 
-- Maintain a Queue(array) containing pending transactions(userdata) that will get minded sequentially.
+- Maintain a Queue(array) containing pending transactions(user data) that will be minded sequentially and added to blockchain.
 
 	To view all pending transactions:
 
 	> GET request to `http://localhost:3000/transactions`
+
+- API for User Registeration:
+
+	> POST request to `http://localhost:3000/register`
+
+	![User Register API example](git_images/register.jpg)
+
+	User input should contain email address and password. In response, you should receive an unique user ID along with a token
+
+
+- API for User Sign In:
+
+	> POST request to `http://localhost:3000/signin`
+
+
+	![User Login API example](git_images/login.jpg)
+
+	
+	API input will contain User ID and password. This User ID that was generated during registeration process.
+	If verification is successful, you will receive a token
+
+
+
 
 - Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
 

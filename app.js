@@ -1,6 +1,6 @@
-const BlockChain = require("./blockchain");
+const BlockChain = require("./modules/blockchain");
 const KEYS = require("./keys");
-const tokenManager = require("./tokenManager"); 
+const tokenManager = require("./modules/tokenManager"); 
 const { SHA256 } = require('crypto-js');
 const express = require('express');
 const { Worker } = require('worker_threads')
@@ -192,7 +192,7 @@ let queueInterval = setInterval(function() {
     if (transactionList.length > 0 && !miningActive) {
         doTransactions();
     }
-}, 3000)
+}, 1000)
 
 http.listen(3000, () => {
     console.log(`Server running at port 3000 `);
