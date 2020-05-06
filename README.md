@@ -67,10 +67,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 
 
-
-- Maintain a database(MongoDB) containing `email id` of registered BlockChain users.
-
-- Manage individual blockchain users using hash verification.
+- Maintain a database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
 
 
 ### Phase-3 :
@@ -111,3 +108,4 @@ A decentralised web application that distributes `blockchain` between individual
 	- Once your transaction is complete and added to blockchain, you can check updated blockchain at:
 
 		> GET `localhost:3000/blockchain`
+

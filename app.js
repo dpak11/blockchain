@@ -1,6 +1,6 @@
 const BlockChain = require("./modules/blockchain");
-const KEYS = require("./keys");
 const tokenManager = require("./modules/tokenManager"); 
+const KEYS = require("./keys");
 const { SHA256 } = require('crypto-js');
 const express = require('express');
 const { Worker } = require('worker_threads')
@@ -22,7 +22,6 @@ let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
 
 
 // Show all Blocks in a BlockChain
-
 app.get("/blockchain", (req, res) => {
     let blocks = [];
     myBlockchain.get().forEach((block) => {
@@ -31,6 +30,7 @@ app.get("/blockchain", (req, res) => {
     res.send({ blockchain: blocks });
 });
 
+// List all pending transactions
 app.get("/transactions", (req, res) => {
     if (transactionList.length == 0) {
         return res.send("No pending transactions")
@@ -38,6 +38,7 @@ app.get("/transactions", (req, res) => {
     return res.json({ inQueue_total: transactionList.length, inQueue_transactions: transactionList });
 });
 
+// User Registeration
 app.post("/register", (req, res) => {
     const {email, password} = req.body;
     if(DUMMY_DB.some(user => user.email === email)){
@@ -51,6 +52,8 @@ app.post("/register", (req, res) => {
 
 });
 
+
+// User Login
 app.post("/login", (req, res) => {
     const {userid, password} = req.body;
     if(!DUMMY_DB.some(user => user.id == userid)){
@@ -66,8 +69,8 @@ app.post("/login", (req, res) => {
 });
 
 
-// Add new Block into BlockChain using input data 'name' and 'amount'
 
+// Add new transaction Block into BlockChain with 'name' and 'amount' as transaction input
 app.post("/blockdata", (req, res) => {
     const { name, amount, token } = req.body;
     const tokenUser = tokenManager.readToken(token);
@@ -96,7 +99,7 @@ app.post("/blockdata", (req, res) => {
 
 
 // Input will be raw JSON data containing BlockChain.
-// Testing purpose: The Output (JSON) you get from GET request > "/blockchain" will be the input for this (POST request)
+// Testing purpose: The Output JSON obtained from "GET /blockchain" will be the input for POST /blockchain
 // Try making small changes to the JSON, you get BlockChain error message
 
 app.post("/blockchain", (req, res) => {
