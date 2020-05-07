@@ -39,19 +39,20 @@ A decentralised web application that distributes `blockchain` between individual
 
 ### Phase-2 : 
 
-- Maintain a Queue(array) containing pending transactions(user data) that will be minded sequentially and added to blockchain.
+- Maintain a Queue(array) containing pending transactions that will be minded sequentially and added to blockchain.
 
-	To view all pending transactions:
+	To view all pending transactions for a particular userID:
 
-	> GET request to `http://localhost:3000/transactions`
+	> GET request to `http://localhost:3000/transactions/{userid}`
 
+	
 - API for User Registeration:
 
 	> POST request to `http://localhost:3000/register`
 
 	![User Register API example](git_images/register.jpg)
 
-	User input should contain email address and password. In response, you should receive an unique user ID along with a token
+	User input should contain email address and password. In response, you should receive an unique `user ID` along with a token
 
 
 - API for User LogIn:
@@ -62,8 +63,8 @@ A decentralised web application that distributes `blockchain` between individual
 	![User Login API example](git_images/login.jpg)
 
 	
-	API input will contain User ID and password. This User ID that was generated during registeration process.
-	If verification is successful, you will receive a token
+	User input will contain User ID and password. This is the User ID that was generated during email registeration process.
+	If Login verification is successful, you will receive a token
 
 
 
@@ -97,13 +98,13 @@ A decentralised web application that distributes `blockchain` between individual
 
 		> POST `localhost:3000/register`
 
-	- Next, post data: `amount` and `name` along with token
+	- Next, post data: `amount` and `name` along with the token that was generated suring registeration
 
 		> POST `localhost:3000/blockdata`
 
 	- You can check transaction status at:
 
-		> GET `http://localhost:3000/transactions`
+		> GET `http://localhost:3000/transactions/{userid}`
 
 	- Once your transaction is complete and added to blockchain, you can check updated blockchain at:
 

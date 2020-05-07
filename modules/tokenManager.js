@@ -6,7 +6,7 @@ module.exports = {
         const token = tokie.create({
             data: { userid: id },
             secretKey: KEYS.tokenAccess,
-            expiresIn: "15m"
+            expiresIn: "20m"
         });
         if (token.error) {
             return { error: token.status }

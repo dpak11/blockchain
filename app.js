@@ -31,17 +31,36 @@ app.get("/blockchain", (req, res) => {
 });
 
 // List all pending transactions
-app.get("/transactions", (req, res) => {
+app.get("/transactions/", (req, res) => {
     if (transactionList.length == 0) {
         return res.send("No pending transactions")
     }
-    return res.json({ inQueue_total: transactionList.length, inQueue_transactions: transactionList });
+    
+    return res.send("User ID is missing:\nlocalhost:3000/transactions/userid");
+});
+
+app.get("/transactions/:userid", (req, res) => {
+    if (transactionList.length == 0) {
+        return res.send("No pending transactions")
+    }
+    
+    const userid = req.params.userid;    
+    let queueIndex = [];
+    let pendingTransactions = transactionList.filter((transaction,i) => {
+        if(transaction.userid == userid){
+            queueIndex.push(i);
+            return true
+        }
+        return false
+    });
+    
+    return res.json({ allUsersTransactions_pending: transactionList.length, currentUser_queueNumber: queueIndex[0], currentUserPending: pendingTransactions });
 });
 
 // User Registeration
 app.post("/register", (req, res) => {
     const {email, password} = req.body;
-    if(DUMMY_DB.some(user => user.email === email)){
+    if(DUMMY_DB.some(user => user.email == email)){
         return res.send("Sorry, Email id is already registered.")
     }
     const hashedPass = SHA256(password).toString();
@@ -60,7 +79,7 @@ app.post("/login", (req, res) => {
         return res.send("Sorry, ID not registered")
     }
     const hashedPass = SHA256(password).toString();
-    if(!DUMMY_DB.some(user => (user.id == userid && user.pass === hashedPass))){
+    if(!DUMMY_DB.some(user => (user.id == userid && user.pass == hashedPass))){
         return res.send("Sorry, invalid ID/password combination")
     }
     const mytoken = tokenManager.createToken(userid);
@@ -77,7 +96,8 @@ app.post("/blockdata", (req, res) => {
     if(tokenUser.error){
         return res.send(tokenUser.error)
     }
-    if(!DUMMY_DB.some(user => user.id === tokenUser.userid)){
+
+    if(!DUMMY_DB.some(user => user.id == tokenUser.userid)){
         return res.send("Sorry, Invalid User")
     }    
 
@@ -88,6 +108,7 @@ app.post("/blockdata", (req, res) => {
     auto_id++;
     let transaction = {
         id: auto_id,
+        userid: tokenUser.userid,
         data: inputData
     };
     transactionList.push(transaction);
@@ -112,7 +133,7 @@ app.post("/blockchain", (req, res) => {
     if(tokenUser.error){
         return res.send(tokenUser.error)
     }
-    if(!DUMMY_DB.some(user => user.id === tokenUser.userid)){
+    if(!DUMMY_DB.some(user => user.id == tokenUser.userid)){
         return res.send("Sorry, Invalid User")
     }
 
@@ -147,9 +168,9 @@ async function doTransactions() {
     console.log("transaction started...");
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
-    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE
-    miningActive = false;
+    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    
     transactionList.splice(0, 1);
+    miningActive = false;
     console.log("Block Added");
     return;
 
@@ -180,10 +201,9 @@ const NEW_USER = {
     },
     getID: function() {
         let newID = this.generate();
-        if(DUMMY_DB.some(user => user.userid === newID)){
+        if(DUMMY_DB.some(user => user.userid == newID)){
             this.get();
-        }else{
-          DUMMY_DB.push({userid:newID})
+        }else{          
           return newID;  
         }        
     }
