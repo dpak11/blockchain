@@ -159,13 +159,21 @@ app.post("/blockchain", (req, res) => {
             return res.send("Error: BlockChain Rejected")
         }
     }
-    myBlockchain = tempBlockChain;
-    res.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
+   
+    if(myBlockchain.get().length < tempBlockChain.get().length){
+        if(miningActive){
+            return res.send("Mining is in progress. Can not accept BlockChain now")
+        }
+        myBlockchain = tempBlockChain;
+        return res.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
+    }
+    return res.send("Your copy of blockchain is not the latest")
+    
 
 });
 
 async function doTransactions() {
-    console.log("transaction started...");
+    console.log("transaction processing for ID: "+transactionList[0].id);
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
     myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    

@@ -8,7 +8,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 ### Phase-1 : 
 
-- API to add transaction into block chain.
+1) API to add transaction into block chain.
 
 	> POST request to `http://localhost:3000/blockdata`
 
@@ -19,18 +19,20 @@ A decentralised web application that distributes `blockchain` between individual
 
 	This will generate individual block that will have `block index`, `timestamp`, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), `hash`, `previousHash`.
 
-- API to fetch latest blockchain from network.
+2) API to fetch latest blockchain from network.
 
 	> GET request to `http://localhost:3000/blockchain`
 
-- API to submit raw JSON data containing blockchain. Each of the block is validated before attaching it to the main BlockChain
+	Refer below example #3 to see the blockchain format.
+
+
+3) API to submit raw JSON data containing blockchain. Each block is validated before adding it to the main BlockChain
 
 	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
 
 	![Post blockchain API example](git_images/blockchain.jpg)
 
-	In the above example we tried to POST raw JSON data containing blockchain. After validating all 3 individual blocks from JSON (but only the first 2 is visible in screenshot), it gets added to the main blockchain in the network.
-
+	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API (example #2), we then submit our JSON data containing blockchain into the network. The network will start validating every individual block of every single blockchain obtained from different users, and then updates the main blockchain array with latest valid blockchain.
 	
 
 	
@@ -98,7 +100,7 @@ A decentralised web application that distributes `blockchain` between individual
 
 		> POST `localhost:3000/register`
 
-	- Next, post data: `amount` and `name` along with the token that was generated suring registeration
+	- Next, post data: `amount` and `name` along with the token that was generated during registeration
 
 		> POST `localhost:3000/blockdata`
 
