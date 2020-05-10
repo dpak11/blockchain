@@ -3,7 +3,7 @@
 
 A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress that is currently in Phase-2 stage.
+> This is a work-in-progress that is currently entering into Phase-3 stage.
 
 
 ### Phase-1 : 
