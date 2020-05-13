@@ -1,9 +1,9 @@
-# Blockchain (Decentralised)
+# Blockchain
 
 
-A decentralised web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
+A decentralised blockchain application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress that is currently entering into Phase-3 stage.
+> This is a work-in-progress, currently completed Phase-2 
 
 
 ### Phase-1 : 

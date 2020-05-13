@@ -21,41 +21,6 @@ let miningActive = false;
 let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
 
 
-// Show all Blocks in a BlockChain
-app.get("/blockchain", (req, res) => {
-    let blocks = [];
-    myBlockchain.get().forEach((block) => {
-        blocks.push(block.get());
-    })
-    res.send({ blockchain: blocks });
-});
-
-// List all pending transactions
-app.get("/transactions/", (req, res) => {
-    if (transactionList.length == 0) {
-        return res.send("No pending transactions")
-    }
-    
-    return res.send("User ID is missing:\nlocalhost:3000/transactions/userid");
-});
-
-app.get("/transactions/:userid", (req, res) => {
-    if (transactionList.length == 0) {
-        return res.send("No pending transactions")
-    }
-    
-    const userid = req.params.userid;    
-    let queueIndex = [];
-    let pendingTransactions = transactionList.filter((transaction,i) => {
-        if(transaction.userid == userid){
-            queueIndex.push(i);
-            return true
-        }
-        return false
-    });
-    
-    return res.json({ allUsersTransactions_pending: transactionList.length, currentUser_queueNumber: queueIndex[0], currentUserPending: pendingTransactions });
-});
 
 // User Registeration
 app.post("/register", (req, res) => {
@@ -88,8 +53,38 @@ app.post("/login", (req, res) => {
 });
 
 
+// Show all Blocks in a BlockChain
+app.get("/blockchain", (req, res) => {
+    let blocks = [];
+    myBlockchain.get().forEach((block) => {
+        blocks.push(block.get());
+    })
+    res.send({ blockchain: blocks });
+});
 
-// Add new transaction Block into BlockChain with 'name' and 'amount' as transaction input
+
+app.get("/transactions/", (req, res) => {
+    if (transactionList.length == 0) {
+        return res.send("No pending transactions")
+    }
+    
+    return res.send("User ID is missing:\nlocalhost:3000/transactions/{userid}");
+});
+
+
+// List all pending transactions
+app.get("/transactions/:userid", (req, res) => {
+    if (transactionList.length == 0) {
+        return res.send("No pending transactions")
+    }
+    getPendingTransactions(req.params.userid, res);
+    
+});
+
+
+
+
+// Add new transaction Block into BlockChain with 'name' and 'amount' as transaction inputs
 app.post("/blockdata", (req, res) => {
     const { name, amount, token } = req.body;
     const tokenUser = tokenManager.readToken(token);
@@ -104,14 +99,13 @@ app.post("/blockdata", (req, res) => {
     if (!name || !amount) {
         return res.send("Required 'name', 'amount'");
     }
-    let inputData = { name, amount };
-    auto_id++;
-    let transaction = {
+    
+    auto_id++;    
+    transactionList.push({
         id: auto_id,
         userid: tokenUser.userid,
-        data: inputData
-    };
-    transactionList.push(transaction);
+        data: {name, amount}
+    });
     return res.send("Your Transaction is added to Queue. Transaction ID is: " + auto_id + "\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at 'localhost:3000/blockchain'");
 
 
@@ -141,36 +135,53 @@ app.post("/blockchain", (req, res) => {
         return res.send("Error: Blockchain not found");
     }
 
+    postBlockChain(blockchain_json,res);    
+
+});
+
+function getPendingTransactions(userid,resp){ 
+    let queueIndex = [];
+    let pendingTransactions = transactionList.filter((transaction,i) => {
+        if(transaction.userid == userid){
+            queueIndex.push(i);
+            return true
+        }
+        return false
+    });
+    
+    resp.json({ allUsersTransactions_pending: transactionList.length, currentUser_queueNumber: queueIndex[0], currentUserPending: pendingTransactions });
+
+}
+
+function postBlockChain(block_chain_json, resp){
     const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     tempBlockChain.clear();
 
-    for (let i = 0; i < blockchain_json.length; i++) {
-        const bchain = blockchain_json[i];
+    for (let i = 0; i < block_chain_json.length; i++) {
+        const bchain = block_chain_json[i];
         if (typeof bchain !== "object") {
-            return res.send("Error: Blockchain not found");
+            return resp.send("Error: Invalid Blockchain");
         }
         if (!bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
-            return res.send("Error: Invalid Blockchain");
+            return resp.send("Error: Invalid Blockchain");
         }
 
         let userData = { name: bchain.user_data.name, amount: bchain.user_data.amount };
         tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false); // Mining is set to FALSE
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
-            return res.send("Error: BlockChain Rejected")
+            return resp.send("Error: Invalid Blockchain")
         }
     }
    
     if(myBlockchain.get().length < tempBlockChain.get().length){
         if(miningActive){
-            return res.send("Mining is in progress. Can not accept BlockChain now")
+            return resp.send("Mining is in progress. Can not accept BlockChain now")
         }
         myBlockchain = tempBlockChain;
-        return res.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
+        return resp.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
     }
-    return res.send("Your copy of blockchain is not the latest")
-    
-
-});
+    resp.send("Your copy of blockchain is not the latest")
+}
 
 async function doTransactions() {
     console.log("transaction processing for ID: "+transactionList[0].id);
