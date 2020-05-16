@@ -7,6 +7,7 @@ const { Worker } = require('worker_threads')
 const bodyParser = require('body-parser');
 const app = express();
 const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +20,27 @@ let transactionList = [];
 let auto_id = 0;
 let miningActive = false;
 let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
+
+
+// Socket Handling - Decentralize 
+
+io.on('connection', (socket) => {
+    console.log('made socket connection', socket.id);
+
+     socket.on('joined', (data) => {
+        socket.emit("joined_network", io.sockets.connectedUsers);
+     });
+
+     //socket.broadcast.to().emit('', { });
+
+     socket.broadcast.emit("newUserJoined");
+
+      socket.on('disconnect', () => {
+        // user disconnected
+
+      });
+
+});
 
 
 
@@ -228,6 +250,8 @@ const NEW_USER = {
     }
 
 };
+
+
 
 
 let queueInterval = setInterval(function() {
