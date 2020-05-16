@@ -73,7 +73,7 @@ A decentralised blockchain application that distributes `blockchain` between ind
 - Maintain a database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
 
 
-### Phase-3 :
+### Phase-3 : [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
 1) Decentralisation using Socket.IO
 
