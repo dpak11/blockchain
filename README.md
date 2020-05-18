@@ -3,11 +3,11 @@
 
 A decentralised blockchain application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress, currently in Step-1 development stage
+> Status: Work-in-progress
 
 
 
-1) Decentralisation using Socket.IO
+1) Implement Decentralisation using Socket.IO
 
 2) For Developers: A piece of Code needs to be added into your website inorder to receive and transmit latest blockchain.
 

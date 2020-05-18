@@ -25,20 +25,28 @@ let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
 // Socket Handling - Decentralize 
 
 io.on('connection', (socket) => {
-    console.log('made socket connection', socket.id);
+    console.log('New socket connection', socket.id);
+    io.sockets.connectedUsers.push({sockedID:socket.id});
+    socket.emit("Users", io.sockets.connectedUsers);
 
-     socket.on('joined', (data) => {
-        socket.emit("joined_network", io.sockets.connectedUsers);
+     socket.on('blockChainRequest', (data) => {
+        const tokenError = validateToken(data.token).includes("Error:");
+        if(!tokenError){
+            if(data.initBlockChain){
+                const blockchainUpdate = updateLatestBlockChain(data.initBlockChain)
+                if(blockchainStatus.includes("Error:") || blockchainStatus.includes("Warning:")){
+                    socket.emit("statusFail", blockchainUpdate);
+                }else{
+                    socket.emit("statusSuccess", blockchainUpdate);
+                    socket.broadcast.emit("BlockChainNew", myBlockchain);
+                }
+                
+            }
+        }else{
+            socket.emit("statusFail", tokenError);
+        }
+        
      });
-
-     //socket.broadcast.to().emit('', { });
-
-     socket.broadcast.emit("newUserJoined");
-
-      socket.on('disconnect', () => {
-        // user disconnected
-
-      });
 
 });
 
@@ -139,27 +147,24 @@ app.post("/blockdata", (req, res) => {
 // Testing purpose: The Output JSON obtained from "GET /blockchain" will be the input for POST /blockchain
 // Try making small changes to the JSON, you get BlockChain error message
 
-app.post("/blockchain", (req, res) => {
-    const blockchain_json = req.body.blockchain;    
-    if(!req.query.token){
-        return res.send("Token is missing")
+function validateToken(token){
+    if(!token){
+        return "Error: Token is missing"
     }    
 
-    const tokenUser = tokenManager.readToken(req.query.token);
+    const tokenUser = tokenManager.readToken(token);
     if(tokenUser.error){
-        return res.send(tokenUser.error)
+        return "Error: "+tokenUser.status
     }
     if(!DUMMY_DB.some(user => user.id == tokenUser.userid)){
-        return res.send("Sorry, Invalid User")
+        return "Error: Sorry, Invalid User"
     }
 
-    if (!Array.isArray(blockchain_json)) {
-        return res.send("Error: Blockchain not found");
+    if (!Array.isArray(initBlockChain)) {
+        return "Error: Blockchain not found"
     }
+}
 
-    postBlockChain(blockchain_json,res);    
-
-});
 
 function getPendingTransactions(userid,resp){ 
     let queueIndex = [];
@@ -175,34 +180,37 @@ function getPendingTransactions(userid,resp){
 
 }
 
-function postBlockChain(block_chain_json, resp){
+function updateLatestBlockChain(block_chain_json){
+    if (!Array.isArray(block_chain_json)) {
+        return "Error: Blockchain not found"
+    }
     const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     tempBlockChain.clear();
 
     for (let i = 0; i < block_chain_json.length; i++) {
         const bchain = block_chain_json[i];
         if (typeof bchain !== "object") {
-            return resp.send("Error: Invalid Blockchain");
+            return "Error: Invalid Blockchain";
         }
         if (!bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
-            return resp.send("Error: Invalid Blockchain");
+            return "Error: Invalid Blockchain";
         }
 
         let userData = { name: bchain.user_data.name, amount: bchain.user_data.amount };
         tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp, bchain.hash, bchain.prevHash, false); // Mining is set to FALSE
         if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
-            return resp.send("Error: Invalid Blockchain")
+            return "Error: Invalid Blockchain"
         }
     }
    
     if(myBlockchain.get().length < tempBlockChain.get().length){
         if(miningActive){
-            return resp.send("Mining is in progress. Can not accept BlockChain now")
+            return "Warning: Mining is in progress. Can not accept BlockChain now"
         }
         myBlockchain = tempBlockChain;
-        return resp.send(tempBlockChain.get().length + " Blocks Added to BlockChain successfuly ")
+        return tempBlockChain.get().length + " Blocks Added to BlockChain successfuly "
     }
-    resp.send("Your copy of blockchain is not the latest")
+    return "Warning: Your copy of blockchain is not the latest"
 }
 
 async function doTransactions() {
