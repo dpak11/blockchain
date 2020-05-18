@@ -1,9 +1,9 @@
 # Blockchain
 
 
-A decentralised blockchain application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
+A blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress, currently completed Phase-2 
+> This is a work-in-progress, currently in Phase-3 Development 
 
 
 ### Phase-1 : 
@@ -73,15 +73,11 @@ A decentralised blockchain application that distributes `blockchain` between ind
 - Maintain a database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
 
 
-### Phase-3 : [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
+### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-1) Decentralisation using Socket.IO
+	Updated: 18 May
 
-2) For Developers: A piece of Code needs to be added into your website inorder to receive and transmit latest blockchain.
 
-3) Registered Users should be able to manually download a copy of latest BlockChain on clicking a button. However, this is not required if (2) was implemented.
-
-4) Registered Users should also be able to upload the BlockChain into the Network. However this is not required if (2) was implemented.
 
 
 ---
