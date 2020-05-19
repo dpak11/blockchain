@@ -1,9 +1,9 @@
 # Blockchain
 
 
-A blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
+A blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress, currently in Phase-3 Development 
+> This is a work-in-progress, currently in Phase-3 Development (Decentralisation)
 
 
 ### Phase-1 : 
@@ -75,14 +75,14 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-	Updated: 18 May
+Last Update: 18 May 
 
 
 
 
 ---
 
-## To Test Blockchain:
+## Test Blockchain API (without Decentralisation):
 
 1) Download or clone this repository into a new directory in your Local.
 
