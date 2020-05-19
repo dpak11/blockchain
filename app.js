@@ -19,26 +19,31 @@ const DUMMY_DB = []; // for testing
 let transactionList = [];
 let auto_id = 0;
 let miningActive = false;
-let myBlockchain = BlockChain(DIFFICULTY, MASTER_KEY);
 
 
 // Socket Handling - Decentralize 
 
 io.on('connection', (socket) => {
     console.log('New socket connection', socket.id);
-    io.sockets.connectedUsers.push({sockedID:socket.id});
-    socket.emit("Users", io.sockets.connectedUsers);
+    if(!io.sockets.mainBlockChain){
+        io.sockets.mainBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
+    }
+    if(!io.sockets.connectedUsers){
+        io.sockets.connectedUsers = [];
+    }
 
-     socket.on('blockChainRequest', (data) => {
+    io.sockets.connectedUsers.push({sockedID:socket.id});
+    socket.emit("ConnectedUsers", io.sockets.connectedUsers.length);
+
+     socket.on('blockChainConnect', (data) => {
         const tokenError = validateToken(data.token).includes("Error:");
         if(!tokenError){
             if(data.initBlockChain){
                 const blockchainUpdate = updateLatestBlockChain(data.initBlockChain)
                 if(blockchainStatus.includes("Error:") || blockchainStatus.includes("Warning:")){
                     socket.emit("statusFail", blockchainUpdate);
-                }else{
-                    socket.emit("statusSuccess", blockchainUpdate);
-                    socket.broadcast.emit("BlockChainNew", myBlockchain);
+                }else{                    
+                    socket.broadcast.emit("shareUpdatedBlockChain", getBlockChain());
                 }
                 
             }
@@ -84,13 +89,13 @@ app.post("/login", (req, res) => {
 
 
 // Show all Blocks in a BlockChain
-app.get("/blockchain", (req, res) => {
-    let blocks = [];
-    myBlockchain.get().forEach((block) => {
-        blocks.push(block.get());
-    })
-    res.send({ blockchain: blocks });
-});
+function getBlockChain(){
+    const main_blockChain = io.sockets.mainBlockChain.get();
+    let blocks = main_blockChain.map((block) => {
+        return block.get();
+    });
+    return { blockchain: blocks }
+}
 
 
 app.get("/transactions/", (req, res) => {
@@ -203,11 +208,11 @@ function updateLatestBlockChain(block_chain_json){
         }
     }
    
-    if(myBlockchain.get().length < tempBlockChain.get().length){
+    if(io.sockets.mainBlockChain.get().length < tempBlockChain.get().length){
         if(miningActive){
             return "Warning: Mining is in progress. Can not accept BlockChain now"
         }
-        myBlockchain = tempBlockChain;
+        io.sockets.mainBlockChain = tempBlockChain;
         return tempBlockChain.get().length + " Blocks Added to BlockChain successfuly "
     }
     return "Warning: Your copy of blockchain is not the latest"
@@ -217,7 +222,7 @@ async function doTransactions() {
     console.log("transaction processing for ID: "+transactionList[0].id);
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
-    myBlockchain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    
+    io.sockets.mainBlockChain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    
     transactionList.splice(0, 1);
     miningActive = false;
     console.log("Block Added");
@@ -227,7 +232,7 @@ async function doTransactions() {
 
 function processBlockChain() {
     miningActive = true;
-    let lastBlock = myBlockchain.lastBlock().get();
+    let lastBlock = io.sockets.mainBlockChain.lastBlock().get();
     return new Promise((resolve, reject) => {
         const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel:DIFFICULTY, MASTER_KEY } });
         worker.on('message', resolve);
