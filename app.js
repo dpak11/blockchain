@@ -9,6 +9,7 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
+app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -264,14 +265,16 @@ const NEW_USER = {
 
 };
 
-
-
-
 let queueInterval = setInterval(function() {
     if (transactionList.length > 0 && !miningActive) {
         doTransactions();
     }
-}, 1000)
+}, 1000);
+
+
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html");
+})
 
 http.listen(3000, () => {
     console.log(`Server running at port 3000 `);
