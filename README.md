@@ -41,7 +41,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-2 : 
 
-- Maintain a Queue(array) containing pending transactions that will be minded sequentially and added to blockchain.
+- API to list all pending transactions that needs to be mined sequentially (and later added to blockchain).
 
 	To view all pending transactions for a particular userID:
 
@@ -75,14 +75,14 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [21 May](https://github.com/dpak11/blockchain/commit/698a24cb76b17d3db1d220e8a6aba560402b6fe0)
+Last Update: [29 June](https://github.com/dpak11/blockchain/commit/66bec8917a61536c5cb9078b590d2bc39c937368)
 
 
 
 
 ---
 
-## Test Blockchain API (without Decentralisation):
+## To test Blockchain till Phase-2:
 
 1) Download or clone this repository into a new directory in your Local.
 
