@@ -12,10 +12,81 @@
     
     <!-- <link rel="stylesheet" href="assets/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-    <script type="text/javascript" src="assets/socket.io.js"></script> -->
+     -->
+    
 </head>
 
 <body>
-	<script src="myworker.js"></script>
+    <p>Users: <span id="total-users"></span></p>
+    <form>
+        <p>
+            <label for="UserEmail">User Email:</label><input type="text" id="UserEmail" name="UserEmail">
+        </p>
+        <p>
+            <label for="UserPswd">Password:</label><input type="password" id="UserPswd" name="UserPswd">
+        </p>
+        <p>
+            <label for="ConfirmPswd">Confirm Password:</label><input type="confirm" id="ConfirmPswd" name="ConfirmPswd">
+        </p>
+        <input type="submit" value="Register">
+
+    </form>
+    <span id="statusmsg"></span>
+	<!-- <script src="myworker.js"></script> -->
+     <script src="socket.io.js"></script>
+    <script>
+        let socket = null;
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function(e){
+            console.log("Submit");
+            e.preventDefault();
+             const email = form.UserEmail.value;
+             const password = form.UserPswd.value;
+             const confirm = form.ConfirmPswd.value;
+             if(password === confirm){
+                fetch("../register/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({email,password}) })
+                .then(data => data.json())
+                .then((res) => {
+                    if(res.status == "registered"){
+                        form.remove();
+                        localStorage.setItem("token",res.token);
+                        document.getElementById("statusmsg").textContent = `Token created successfuly! User ID is: ${res.UserID}`
+                        initSocket();
+                    }else{
+                        alert(res.status)
+                    }
+                    
+                });
+             }else{
+                alert("Passwords not matching")
+             }
+                    
+               
+        });
+        
+
+        function initSocket(){
+            socket = io();
+            socket.on('ConnectedUsers', (usersNum) => {
+                document.getElementById("total-users").textContent = usersNum;
+            });
+
+            socket.emit('createRoom', {
+                 
+             });
+        }
+
+        const token = localStorage.getItem("token") || null;
+        if(token){
+            fetch("../checktoken/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({token}) })
+                .then(data => data.json())
+                .then((res) => {
+                    if(res.status == "valid"){
+                        form.remove();
+                    }
+                })
+        }
+        
+    </script>
 </body>
 </html>

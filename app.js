@@ -1,5 +1,5 @@
 const BlockChain = require("./modules/blockchain");
-const tokenManager = require("./modules/tokenManager"); 
+const tokenManager = require("./modules/tokenManager");
 const KEYS = require("./keys");
 const { SHA256 } = require('crypto-js');
 const express = require('express');
@@ -26,33 +26,34 @@ let miningActive = false;
 
 io.on('connection', (socket) => {
     console.log('New socket connection', socket.id);
-    if(!io.sockets.mainBlockChain){
+    if (!io.sockets.mainBlockChain) {
         io.sockets.mainBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     }
-    if(!io.sockets.connectedUsers){
+    if (!io.sockets.connectedUsers) {
         io.sockets.connectedUsers = [];
     }
 
-    io.sockets.connectedUsers.push({sockedID:socket.id});
+    io.sockets.connectedUsers.push({ sockedID: socket.id });
     socket.emit("ConnectedUsers", io.sockets.connectedUsers.length);
 
-     socket.on('blockChainConnect', (data) => {
-        const tokenError = validateToken(data.token).includes("Error:");
-        if(!tokenError){
-            if(data.initBlockChain){
-                const blockchainUpdate = updateLatestBlockChain(data.initBlockChain)
-                if(blockchainStatus.includes("Error:") || blockchainStatus.includes("Warning:")){
+    socket.on('blockChainConnect', (data) => {
+        const tokenState = validateToken(data.token);
+
+        if (!tokenState.includes("Error:")) {
+            if (data.clientBlockChain) {
+                const blockchainUpdate = updateLatestBlockChain(data.clientBlockChain)
+                if (blockchainStatus.includes("Error:") || blockchainStatus.includes("Warning:")) {
                     socket.emit("statusFail", blockchainUpdate);
-                }else{                    
+                } else {
                     socket.broadcast.emit("shareUpdatedBlockChain", getBlockChain());
                 }
-                
+
             }
-        }else{
-            socket.emit("statusFail", tokenError);
+        } else {
+            socket.emit("statusFail", tokenState);
         }
-        
-     });
+
+    });
 
 });
 
@@ -60,37 +61,51 @@ io.on('connection', (socket) => {
 
 // User Registeration
 app.post("/register", (req, res) => {
-    const {email, password} = req.body;
-    if(DUMMY_DB.some(user => user.email == email)){
-        return res.send("Sorry, Email id is already registered.")
+    const { email, password } = req.body;
+    /*const isEmailValid = (/(^[.a-z0-9_\-]{3,30})@[a-z]{3,15}\.(com|in|co.in|org|net)$/).test(email);
+    if(!isEmailValid){
+       return res.json({status:"Email Invalid"}) 
+    }*/
+    if (DUMMY_DB.some(user => user.email == email)) {
+        return res.json({status:"Email id is already registered."})
     }
     const hashedPass = SHA256(password).toString();
     const userID = NEW_USER.getID();
     const mytoken = tokenManager.createToken(userID);
-    DUMMY_DB.push({email:email, pass:hashedPass, id: userID});
-    return res.json({status:"Successfuly registered", UserID: userID, temporaryToken:mytoken, tokenValidity:"20 minutes"});
+    DUMMY_DB.push({ email: email, pass: hashedPass, id: userID });
+    return res.json({ status: "registered", UserID: userID, token: mytoken, tokenValidity: "20 minutes" });
 
 });
 
 
 // User Login
 app.post("/login", (req, res) => {
-    const {userid, password} = req.body;
-    if(!DUMMY_DB.some(user => user.id == userid)){
+    const { userid, password } = req.body;
+    if (!DUMMY_DB.some(user => user.id == userid)) {
         return res.send("Sorry, ID not registered")
     }
     const hashedPass = SHA256(password).toString();
-    if(!DUMMY_DB.some(user => (user.id == userid && user.pass == hashedPass))){
+    if (!DUMMY_DB.some(user => (user.id == userid && user.pass == hashedPass))) {
         return res.send("Sorry, invalid ID/password combination")
     }
     const mytoken = tokenManager.createToken(userid);
-    return res.json({temporaryToken:mytoken, tokenValidity:"20 minutes"});
+    return res.json({ temporaryToken: mytoken, tokenValidity: "20 minutes" });
+
+});
+
+app.post("/checktoken", (req, res) => {    
+    const tokenState = validateToken(req.body.token, false);
+    if(tokenState.includes("Error:")){
+        return res.json({status:tokenState})
+    }    
+   // console.log("222");
+    return res.json({status:"valid"})    
 
 });
 
 
 // Show all Blocks in a BlockChain
-function getBlockChain(){
+function getBlockChain() {
     const main_blockChain = io.sockets.mainBlockChain.get();
     let blocks = main_blockChain.map((block) => {
         return block.get();
@@ -103,7 +118,7 @@ app.get("/transactions/", (req, res) => {
     if (transactionList.length == 0) {
         return res.send("No pending transactions")
     }
-    
+
     return res.send("User ID is missing:\nlocalhost:3000/transactions/{userid}");
 });
 
@@ -114,7 +129,7 @@ app.get("/transactions/:userid", (req, res) => {
         return res.send("No pending transactions")
     }
     getPendingTransactions(req.params.userid, res);
-    
+
 });
 
 
@@ -124,23 +139,23 @@ app.get("/transactions/:userid", (req, res) => {
 app.post("/blockdata", (req, res) => {
     const { name, amount, token } = req.body;
     const tokenUser = tokenManager.readToken(token);
-    if(tokenUser.error){
+    if (tokenUser.error) {
         return res.send(tokenUser.error)
     }
 
-    if(!DUMMY_DB.some(user => user.id == tokenUser.userid)){
+    if (!DUMMY_DB.some(user => user.id == tokenUser.userid)) {
         return res.send("Sorry, Invalid User")
-    }    
+    }
 
     if (!name || !amount) {
         return res.send("Required 'name', 'amount'");
     }
-    
-    auto_id++;    
+
+    auto_id++;
     transactionList.push({
         id: auto_id,
         userid: tokenUser.userid,
-        data: {name, amount}
+        data: { name, amount }
     });
     return res.send("Your Transaction is added to Queue. Transaction ID is: " + auto_id + "\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at 'localhost:3000/blockchain'");
 
@@ -153,40 +168,43 @@ app.post("/blockdata", (req, res) => {
 // Testing purpose: The Output JSON obtained from "GET /blockchain" will be the input for POST /blockchain
 // Try making small changes to the JSON, you get BlockChain error message
 
-function validateToken(token){
-    if(!token){
+function validateToken(token, checkBC = true) {
+    if (!token) {
         return "Error: Token is missing"
-    }    
+    }
 
     const tokenUser = tokenManager.readToken(token);
-    if(tokenUser.error){
-        return "Error: "+tokenUser.status
+    if (tokenUser.error) {
+        return "Error: " + tokenUser.status
     }
-    if(!DUMMY_DB.some(user => user.id == tokenUser.userid)){
+    if (!DUMMY_DB.some(user => user.id == tokenUser.userid)) {
         return "Error: Sorry, Invalid User"
     }
-
-    if (!Array.isArray(initBlockChain)) {
-        return "Error: Blockchain not found"
+    if(checkBC){
+        if (!Array.isArray(initBlockChain)) {
+            return "Error: Blockchain not found"
+        }
     }
+    return "OK";
+    
 }
 
 
-function getPendingTransactions(userid,resp){ 
+function getPendingTransactions(userid, resp) {
     let queueIndex = [];
-    let pendingTransactions = transactionList.filter((transaction,i) => {
-        if(transaction.userid == userid){
+    let pendingTransactions = transactionList.filter((transaction, i) => {
+        if (transaction.userid == userid) {
             queueIndex.push(i);
             return true
         }
         return false
     });
-    
+
     resp.json({ allUsersTransactions_pending: transactionList.length, currentUser_queueNumber: queueIndex[0], currentUserPending: pendingTransactions });
 
 }
 
-function updateLatestBlockChain(block_chain_json){
+function updateLatestBlockChain(block_chain_json) {
     if (!Array.isArray(block_chain_json)) {
         return "Error: Blockchain not found"
     }
@@ -208,9 +226,9 @@ function updateLatestBlockChain(block_chain_json){
             return "Error: Invalid Blockchain"
         }
     }
-   
-    if(io.sockets.mainBlockChain.get().length < tempBlockChain.get().length){
-        if(miningActive){
+
+    if (io.sockets.mainBlockChain.get().length < tempBlockChain.get().length) {
+        if (miningActive) {
             return "Warning: Mining is in progress. Can not accept BlockChain now"
         }
         io.sockets.mainBlockChain = tempBlockChain;
@@ -220,7 +238,7 @@ function updateLatestBlockChain(block_chain_json){
 }
 
 async function doTransactions() {
-    console.log("transaction processing for ID: "+transactionList[0].id);
+    console.log("transaction processing for ID: " + transactionList[0].id);
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
     io.sockets.mainBlockChain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    
@@ -235,7 +253,7 @@ function processBlockChain() {
     miningActive = true;
     let lastBlock = io.sockets.mainBlockChain.lastBlock().get();
     return new Promise((resolve, reject) => {
-        const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel:DIFFICULTY, MASTER_KEY } });
+        const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel: DIFFICULTY, MASTER_KEY } });
         worker.on('message', resolve);
         worker.on('error', reject);
         worker.on('exit', (code) => {
@@ -249,18 +267,18 @@ function processBlockChain() {
 const NEW_USER = {
     generate: function() {
         let id = "";
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 15; i++) {
             id = `${id}${Math.floor(Math.random()*10)}`;
         }
         return Number(id);
     },
     getID: function() {
         let newID = this.generate();
-        if(DUMMY_DB.some(user => user.userid == newID)){
+        if (DUMMY_DB.some(user => user.userid == newID)) {
             this.get();
-        }else{          
-          return newID;  
-        }        
+        } else {
+            return newID;
+        }
     }
 
 };
