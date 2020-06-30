@@ -75,14 +75,14 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [29 June](https://github.com/dpak11/blockchain/commit/66bec8917a61536c5cb9078b590d2bc39c937368)
+Last Update: [30 June](https://github.com/dpak11/blockchain/commit/3d9d68a1a649628cc6013fe86fa9046d83c0f010)
 
 
 
 
 ---
 
-## To test Blockchain till Phase-2:
+## To test Blockchain (Phase-2):
 
 1) Download or clone this repository into a new directory in your Local.
 
