@@ -26,15 +26,20 @@ let miningActive = false;
 
 io.on('connection', (socket) => {
     console.log('New socket connection', socket.id);
-    if (!io.sockets.mainBlockChain) {
+    /*if (!io.sockets.mainBlockChain) {
         io.sockets.mainBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
-    }
+    }*/
     if (!io.sockets.connectedUsers) {
         io.sockets.connectedUsers = [];
     }
 
-    io.sockets.connectedUsers.push({ sockedID: socket.id });
-    socket.emit("ConnectedUsers", io.sockets.connectedUsers.length);
+    
+    socket.on("addToUserList", (user_id) => {
+        console.log("addToUserList:"+user_id);        
+        io.sockets.connectedUsers.push({user_id,sockedID: socket.id});
+        console.log(io.sockets.connectedUsers);
+        socket.emit("ConnectedUsers", io.sockets.connectedUsers.length);
+    });
 
     socket.on('blockChainConnect', (data) => {
         const tokenState = validateToken(data.token);
@@ -62,10 +67,10 @@ io.on('connection', (socket) => {
 // User Registeration
 app.post("/register", (req, res) => {
     const { email, password } = req.body;
-    /*const isEmailValid = (/(^[.a-z0-9_\-]{3,30})@[a-z]{3,15}\.(com|in|co.in|org|net)$/).test(email);
+    const isEmailValid = (/(^[.a-z0-9_\-]{3,30})@[a-z]{3,15}\.(com|in|co.in|org|net)$/).test(email);
     if(!isEmailValid){
        return res.json({status:"Email Invalid"}) 
-    }*/
+    }
     if (DUMMY_DB.some(user => user.email == email)) {
         return res.json({status:"Email id is already registered."})
     }
@@ -73,7 +78,7 @@ app.post("/register", (req, res) => {
     const userID = NEW_USER.getID();
     const mytoken = tokenManager.createToken(userID);
     DUMMY_DB.push({ email: email, pass: hashedPass, id: userID });
-    return res.json({ status: "registered", UserID: userID, token: mytoken, tokenValidity: "20 minutes" });
+    return res.json({ status: "done", userID, token: mytoken, tokenValidity: "20 minutes" });
 
 });
 
@@ -82,14 +87,14 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
     const { userid, password } = req.body;
     if (!DUMMY_DB.some(user => user.id == userid)) {
-        return res.send("Sorry, ID not registered")
+        return res.send({status:"Sorry, ID not registered"})
     }
     const hashedPass = SHA256(password).toString();
     if (!DUMMY_DB.some(user => (user.id == userid && user.pass == hashedPass))) {
-        return res.send("Sorry, invalid ID/password combination")
+        return res.send({status:"Sorry, invalid ID/password combination"})
     }
     const mytoken = tokenManager.createToken(userid);
-    return res.json({ temporaryToken: mytoken, tokenValidity: "20 minutes" });
+    return res.json({ status:"done", token: mytoken, tokenValidity: "20 minutes" });
 
 });
 
@@ -98,7 +103,7 @@ app.post("/checktoken", (req, res) => {
     if(tokenState.includes("Error:")){
         return res.json({status:tokenState})
     }    
-   // console.log("222");
+   
     return res.json({status:"valid"})    
 
 });
@@ -164,9 +169,6 @@ app.post("/blockdata", (req, res) => {
 
 
 
-// Input will be raw JSON data containing BlockChain.
-// Testing purpose: The Output JSON obtained from "GET /blockchain" will be the input for POST /blockchain
-// Try making small changes to the JSON, you get BlockChain error message
 
 function validateToken(token, checkBC = true) {
     if (!token) {
@@ -175,7 +177,7 @@ function validateToken(token, checkBC = true) {
 
     const tokenUser = tokenManager.readToken(token);
     if (tokenUser.error) {
-        return "Error: " + tokenUser.status
+        return "Error: " + tokenUser.error
     }
     if (!DUMMY_DB.some(user => user.id == tokenUser.userid)) {
         return "Error: Sorry, Invalid User"
@@ -267,10 +269,11 @@ function processBlockChain() {
 const NEW_USER = {
     generate: function() {
         let id = "";
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 8; i++) {
             id = `${id}${Math.floor(Math.random()*10)}`;
         }
-        return Number(id);
+        id = id.substr(0,4)+"-"+id.substr(4)
+        return id;
     },
     getID: function() {
         let newID = this.generate();
