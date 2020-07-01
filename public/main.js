@@ -1,5 +1,9 @@
 let socket = null;
 const form = document.querySelector("form");
+const registerBtn = document.querySelector("#register");
+const loginBtn = document.querySelector("#signin");
+
+
 const token = sessionStorage.getItem("token") || null;
 if (token) {
     fetch("../checktoken/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) })
@@ -18,6 +22,13 @@ if (token) {
 
         })
 }
+
+registerBtn.addEventListener("click", function(e) {
+    document.querySelector("label[for=UserEmail]").textContent="User Email:";
+});
+loginBtn.addEventListener("click", function(e) {
+    document.querySelector("label[for=UserEmail]").textContent="User ID:";
+})
 
 form.addEventListener("submit", function(e) {
     e.preventDefault();
