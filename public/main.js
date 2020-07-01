@@ -1,18 +1,21 @@
 let socket = null;
 const form = document.querySelector("form");
-const token = localStorage.getItem("token") || null;
+const token = sessionStorage.getItem("token") || null;
 if (token) {
     fetch("../checktoken/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) })
         .then(data => data.json())
         .then((res) => {
             if (res.status == "valid") {
                 form.remove();
-                document.getElementById("statusmsg").textContent = "You are logged In"
-            }
-            if (res.status.includes("expired!")) {
+                document.getElementById("statusmsg").textContent = "You are logged In";
+                initSocket(res.user);
+            } else if (res.status == "multiple_login") {
+                alert("Duplicate log In detected");
+            } else {
                 console.log("expired");
-                localStorage.removeItem("token")
+                sessionStorage.removeItem("token")
             }
+
         })
 }
 
@@ -21,23 +24,19 @@ form.addEventListener("submit", function(e) {
     const email = form.UserEmail.value;
     const password = form.UserPswd.value;
     const registerBtn = document.getElementById("register");
-    let valid = true;
     let restUrl = "../login";
     let payload = { userid: email, email, password }
     if (registerBtn.checked) {
         restUrl = "../register";
 
     }
-    if (email.trim() == "" || password.trim() == "") {
-        valid = false;
-    }
-    if (valid) {
+    if (email.trim() !== "" && password.trim() !== "") {
         fetch(restUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(data => data.json())
             .then((res) => {
                 if (res.status == "done") {
                     form.remove();
-                    localStorage.setItem("token", res.token);
+                    sessionStorage.setItem("token", res.token);
                     let txtMsg = "";
                     if (restUrl.includes("register")) {
                         txtMsg = `Generated User ID is: ${res.userID}.  Token saved successfuly!`
@@ -54,8 +53,6 @@ form.addEventListener("submit", function(e) {
     } else {
         alert("Field(s) are empty")
     }
-
-
 });
 
 
@@ -67,4 +64,3 @@ function initSocket(userid = null) {
     });
 
 }
-

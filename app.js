@@ -29,21 +29,19 @@ io.on('connection', (socket) => {
     /*if (!io.sockets.mainBlockChain) {
         io.sockets.mainBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     }*/
-    if (!io.sockets.connectedUsers) {
-        io.sockets.connectedUsers = [];
+    if (!io.sockets.connected_bchain_users) {
+        io.sockets.connected_bchain_users = [];
     }
-
-    
+        
     socket.on("addToUserList", (user_id) => {
         console.log("addToUserList:"+user_id);        
-        io.sockets.connectedUsers.push({user_id,sockedID: socket.id});
-        console.log(io.sockets.connectedUsers);
-        socket.emit("ConnectedUsers", io.sockets.connectedUsers.length);
+        io.sockets.connected_bchain_users.push({user_id,sockedID: socket.id});
+        console.log(io.sockets.connected_bchain_users);
+        socket.emit("ConnectedUsers", io.sockets.connected_bchain_users.length);
     });
 
     socket.on('blockChainConnect', (data) => {
         const tokenState = validateToken(data.token);
-
         if (!tokenState.includes("Error:")) {
             if (data.clientBlockChain) {
                 const blockchainUpdate = updateLatestBlockChain(data.clientBlockChain)
@@ -58,6 +56,11 @@ io.on('connection', (socket) => {
             socket.emit("statusFail", tokenState);
         }
 
+    });
+    socket.on('disconnect', () => {
+        io.sockets.connected_bchain_users = io.sockets.connected_bchain_users.filter(conUser => conUser.sockedID !== socket.id);
+        console.log("disconnected:"+socket.id);
+        console.log(io.sockets.connected_bchain_users)
     });
 
 });
@@ -78,7 +81,7 @@ app.post("/register", (req, res) => {
     const userID = NEW_USER.getID();
     const mytoken = tokenManager.createToken(userID);
     DUMMY_DB.push({ email: email, pass: hashedPass, id: userID });
-    return res.json({ status: "done", userID, token: mytoken, tokenValidity: "20 minutes" });
+    return res.json({ status: "done", userID, token: mytoken, tokenValidity: tokenManager.getExpiry() });
 
 });
 
@@ -87,26 +90,44 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
     const { userid, password } = req.body;
     if (!DUMMY_DB.some(user => user.id == userid)) {
-        return res.send({status:"Sorry, ID not registered"})
+        return res.json({status:"Sorry, ID not registered"})
     }
     const hashedPass = SHA256(password).toString();
     if (!DUMMY_DB.some(user => (user.id == userid && user.pass == hashedPass))) {
-        return res.send({status:"Sorry, invalid ID/password combination"})
+        return res.json({status:"Sorry, invalid ID/password combination"})
+    }
+    if(isDuplicateUser(userid)){
+        return res.json({status:"multiple_login"})
     }
     const mytoken = tokenManager.createToken(userid);
-    return res.json({ status:"done", token: mytoken, tokenValidity: "20 minutes" });
+    return res.json({ status:"done", token: mytoken, tokenValidity: tokenManager.getExpiry() });
 
 });
 
 app.post("/checktoken", (req, res) => {    
-    const tokenState = validateToken(req.body.token, false);
+    const tokenState = validateToken(req.body.token);
     if(tokenState.includes("Error:")){
         return res.json({status:tokenState})
     }    
-   
-    return res.json({status:"valid"})    
+   console.log("Connected Users:");
+   console.log(io.sockets.connected_bchain_users);
+   const tokenUser = tokenManager.readToken(req.body.token);
+   if(isDuplicateUser(tokenUser.userid)){
+        return res.json({status:"multiple_login"})
+   }   
+    return res.json({status:"valid",user:tokenUser.userid})    
 
 });
+
+function isDuplicateUser(userid){
+    if(io.sockets.connected_bchain_users){
+        const existingUser = io.sockets.connected_bchain_users.filter(connected => connected.user_id == userid);
+        if(existingUser.length){
+            return true
+        }
+   }
+   return false
+}
 
 
 // Show all Blocks in a BlockChain
@@ -170,7 +191,7 @@ app.post("/blockdata", (req, res) => {
 
 
 
-function validateToken(token, checkBC = true) {
+function validateToken(token) {
     if (!token) {
         return "Error: Token is missing"
     }
@@ -182,11 +203,7 @@ function validateToken(token, checkBC = true) {
     if (!DUMMY_DB.some(user => user.id == tokenUser.userid)) {
         return "Error: Sorry, Invalid User"
     }
-    if(checkBC){
-        if (!Array.isArray(initBlockChain)) {
-            return "Error: Blockchain not found"
-        }
-    }
+    
     return "OK";
     
 }
