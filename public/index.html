@@ -15,6 +15,9 @@
     	form p label, form p input{
     		width: 150px
     	}
+        #userTransaction.hide{
+            display: none
+        }
     </style>
     <!-- <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script> -->
     
@@ -26,7 +29,7 @@
 
 <body>
     <p>Users: <span id="total-users"></span></p>
-    <form>
+    <form id="authenticateUser">
         <p>
             <label for="UserEmail">User Email:</label><input type="text" id="UserEmail">
         </p>
@@ -38,8 +41,18 @@
         <input type="radio" id="signin" value="signin" name="logType"><label for="signin">Login</label>
         
         <br><br>
-        <input type="submit" value="OK">
+        <input type="submit" value="Submit">
 
+    </form>
+    <form id="userTransaction" class="hide">
+        <p>
+            <label for="personName">Name:</label><input type="text" id="personName">
+        </p>
+        <p>
+            <label for="amount">Amount:</label><input type="text" id="amount">
+        </p>
+        <br><br>
+        <input type="submit" value="Send Amount">
     </form>
     <span id="statusmsg"></span>
 	<!-- <script src="myworker.js"></script> -->

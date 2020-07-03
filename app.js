@@ -26,9 +26,9 @@ let miningActive = false;
 
 io.on('connection', (socket) => {
     console.log('New socket connection', socket.id);
-    /*if (!io.sockets.mainBlockChain) {
+    if (!io.sockets.mainBlockChain) {
         io.sockets.mainBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
-    }*/
+    }
     if (!io.sockets.connected_bchain_users) {
         io.sockets.connected_bchain_users = [];
     }
@@ -166,15 +166,15 @@ app.post("/blockdata", (req, res) => {
     const { name, amount, token } = req.body;
     const tokenUser = tokenManager.readToken(token);
     if (tokenUser.error) {
-        return res.send(tokenUser.error)
+        return res.json({status:tokenUser.error})
     }
 
     if (!DUMMY_DB.some(user => user.id == tokenUser.userid)) {
-        return res.send("Sorry, Invalid User")
+        return res.json({status:"Sorry, Invalid User"})
     }
 
     if (!name || !amount) {
-        return res.send("Required 'name', 'amount'");
+        return res.json({status:"Required name, amount"});
     }
 
     auto_id++;
@@ -183,8 +183,7 @@ app.post("/blockdata", (req, res) => {
         userid: tokenUser.userid,
         data: { name, amount }
     });
-    return res.send("Your Transaction is added to Queue. Transaction ID is: " + auto_id + "\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at 'localhost:3000/blockchain'");
-
+    return res.json({status:"done",message:"Your Transaction is added to Queue. Transaction ID is: " + auto_id + "\nView all pending transactions at 'localhost:3000/transactions'\nView BlockChain for completed transactions at 'localhost:3000/blockchain'"});
 
 });
 
@@ -270,6 +269,9 @@ async function doTransactions() {
 
 function processBlockChain() {
     miningActive = true;
+    console.log("BlockChains:");
+    console.log(io.sockets.mainBlockChain);
+
     let lastBlock = io.sockets.mainBlockChain.lastBlock().get();
     return new Promise((resolve, reject) => {
         const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: transactionList[0].data, difficultyLevel: DIFFICULTY, MASTER_KEY } });
