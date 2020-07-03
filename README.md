@@ -32,7 +32,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 	![Post blockchain API example](git_images/blockchain.jpg)
 
-	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API (example #2), we then submit our JSON data containing blockchain into the network. The network will start validating every individual block of every single blockchain obtained from different users, and then updates the main blockchain array with latest valid blockchain.
+	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API (example #2), we then submit our JSON data containing blockchain into the network. The network will start validating every individual block of all blockchains obtained from different users, and then updates the main blockchain array with latest valid blockchain.
 	
 
 	
@@ -75,7 +75,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [1 July, 2020](https://github.com/dpak11/blockchain/commit/38f94703d32c83a6c99d09bd3bece773ca848a33)
+Last Update: [3 July, 2020](https://github.com/dpak11/blockchain/commit/ded236ca326a94a6f5e320d67ba51540264d9897)
 
 
 
