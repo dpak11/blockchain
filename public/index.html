@@ -6,29 +6,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
     <title>Worker page</title>
     <style>
-    	form p{
-    		display: flex
-    	}
-    	form p label, form p input{
-    		width: 150px
-    	}
+        form p{
+            display: flex
+        }
+        form p label, form p input{
+            width: 150px
+        }
         #userTransaction.hide{
             display: none
         }
     </style>
     <!-- <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script> -->
-    
     <!-- <link rel="stylesheet" href="assets/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
      -->
-    
 </head>
 
 <body>
-    <p>Users: <span id="total-users"></span></p>
+    <p><span id="total-users"></span><span id="pendings"></span></p>
     <form id="authenticateUser">
         <p>
             <label for="UserEmail">User Email:</label><input type="text" id="UserEmail">
@@ -36,27 +33,19 @@
         <p>
             <label for="UserPswd">Password:</label><input type="password" id="UserPswd">
         </p>
-        
         <input type="radio" id="register" value="register" checked name="logType"><label for="register">Register</label>
         <input type="radio" id="signin" value="signin" name="logType"><label for="signin">Login</label>
-        
         <br><br>
         <input type="submit" value="Submit">
-
     </form>
-    <form id="userTransaction" class="hide">
-        <p>
-            <label for="personName">Name:</label><input type="text" id="personName">
-        </p>
-        <p>
-            <label for="amount">Amount:</label><input type="text" id="amount">
-        </p>
-        <br><br>
-        <input type="submit" value="Send Amount">
-    </form>
-    <span id="statusmsg"></span>
-	<!-- <script src="myworker.js"></script> -->
-     <script src="socket.io.js"></script>
+    <form id="userTransaction"></form>
+    <p>
+        <span id="statusmsg"></span>
+    </p>
+    <a id="bc_download" href="" download="blockchain">Download Blockchain</a>
+    <!-- <script src="myworker.js"></script> -->
+    <script src="socket.io.js"></script>
     <script src="main.js"></script>
 </body>
+
 </html>
