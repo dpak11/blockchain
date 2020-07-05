@@ -3,7 +3,7 @@
 
 A blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress, currently in Phase-3 Development (Decentralisation)
+> This is a work-in-progress, currently in Phase-3 Development
 
 
 ### Phase-1 : 
@@ -75,7 +75,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [3 July, 2020](https://github.com/dpak11/blockchain/commit/ded236ca326a94a6f5e320d67ba51540264d9897)
+Last Update: [5 July, 2020](https://github.com/dpak11/blockchain/commit/5f27c23263b9661077e7b9c8df660c89bb228e98)
 
 
 
