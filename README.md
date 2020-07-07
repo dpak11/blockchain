@@ -6,3 +6,13 @@ A decentralised blockchain application that distributes `blockchain` between ind
 > Status: Work-in-progress
 
 
+## Test BlockChain:
+
+
+1) Download or clone this repository into a new directory in your Local.
+
+2) Inside the new directory, Open Windows Power Shell / Command prompt and run the command `npm install`.
+
+3) After installation is complete, run the command `npm start`.
+
+4) Open `http://localhost:3000/` in your browser
