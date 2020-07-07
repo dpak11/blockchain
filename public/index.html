@@ -14,8 +14,36 @@
         form p label, form p input{
             width: 150px
         }
-        #userTransaction.hide{
-            display: none
+        
+        #uploadFile {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        #uploadFile+label, #bc_download {
+            font-size: 1em;
+            color: #e6e6f1;
+            background-color: #5d6b9d;
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 4px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #uploadFile:focus+label,
+        #uploadFile+label:hover {
+            background-color: #7482d0;
+        }
+
+        #uploadFile:focus+label {
+            outline: 1px dotted #000;
+            outline: -webkit-focus-ring-color auto 5px;
         }
     </style>
     <!-- <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script> -->
@@ -41,8 +69,7 @@
     <form id="userTransaction"></form>
     <p>
         <span id="statusmsg"></span>
-    </p>
-    <a id="bc_download" href="" download="blockchain">Download Blockchain</a>
+    </p>   
     <!-- <script src="myworker.js"></script> -->
     <script src="socket.io.js"></script>
     <script src="main.js"></script>

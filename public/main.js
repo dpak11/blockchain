@@ -26,6 +26,7 @@ if (token) {
 registerBtn.addEventListener("click", function(e) {
     labelText.textContent = "User Email:";
 });
+
 loginBtn.addEventListener("click", function(e) {
     labelText.textContent = "User ID:";
 })
@@ -70,6 +71,19 @@ userTransaction.addEventListener("submit", function(e) {
 });
 
 
+function uploadBlockChainFile(file) {
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        let contents = JSON.parse(event.target.result);
+        console.log(contents);
+        socket.emit('blockchainUpload', { clientBlockChain: contents, token: sessionStorage.getItem("token") });
+    };
+
+    reader.readAsText(file);
+
+}
+
+
 function authSubmitForm(payload, restUrl) {
     fetch(restUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then(data => data.json())
@@ -92,7 +106,7 @@ function authSubmitForm(payload, restUrl) {
         });
 }
 
-function insertTransactionDOM() {
+function insertTransactionFields() {
     const formDiv = document.createElement("div");
     const formElts = `<p>
             <label for="personName">Name:</label><input type="text" id="personName">
@@ -107,24 +121,56 @@ function insertTransactionDOM() {
 
 }
 
+function insertUploadButton() {
+    const paraElt = document.createElement("p");
+    paraElt.innerHTML = `<input type="file" id="uploadFile" accept="text/plain" />
+        <label for="uploadFile">Upload Blockchain</label>`;
+    document.body.appendChild(paraElt);
+    const blockchainUpload = document.getElementById("uploadFile");
+    blockchainUpload.addEventListener("change", function(evt) {
+        uploadBlockChainFile(evt.target.files[0]);
+    });
+
+    console.log("inserted uploader button");
+
+}
+
+
+function getDownloadLink() {
+    let downloadLink = document.getElementById("bc_download");
+    if (!downloadLink) {
+        const paraElt = document.createElement("p");
+        paraElt.innerHTML = `<a id="bc_download" href="" download="blockchain">Download Blockchain</a>`;
+        document.body.appendChild(paraElt);
+        downloadLink = document.getElementById("bc_download")
+    }
+    return downloadLink;
+
+}
+
 
 function initSocket() {
     socket = io();
     socket.on('ConnectedUsers', (usersNum) => {
         document.getElementById("total-users").textContent = "Users: " + usersNum;
-        insertTransactionDOM();
+        insertTransactionFields();
+        insertUploadButton();
     });
-    socket.on('latestBlockChain', (bc) => {        
-        const blockchainString = JSON.stringify(bc.chain);
-        const downloadLink = document.getElementById("bc_download");
+    socket.on('latestBlockChain', (latest) => {
+        const blockchainString = JSON.stringify(latest.bchain);       
         const bcFile = new Blob([blockchainString], { type: "text/plain" });
-        downloadLink.href = URL.createObjectURL(bcFile);
-        downloadLink.download = "blockchain.text";
-        document.getElementById("pendings").textContent = " / Pending Transactions: " + bc.remaining;
-        document.getElementById("total-users").textContent = "Users: " + bc.users;
-        alert("Received New BlockChain. Use the Download link")
+        const downloader = getDownloadLink();
+        downloader.href = URL.createObjectURL(bcFile);
+        downloader.download = "blockchain.text";
+        document.getElementById("pendings").textContent = " / Pending Transactions: " + latest.remaining;
+        document.getElementById("total-users").textContent = "Users: " + latest.users;
+        alert("Received New BlockChain.")
 
     });
+    socket.on("uploadRejected", (errorStatus) => {
+        alert(errorStatus);
+    });
+
     socket.emit('addToUserList', { token: sessionStorage.getItem("token") });
 
 }

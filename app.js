@@ -36,7 +36,6 @@ io.on('connection', (socket) => {
         const tokenUser = tokenManager.readToken(user.token);
         if (!tokenUser.error) {
             if (!isDuplicateUser(tokenUser.userid)) {
-                console.log("addToUserList:" + tokenUser.userid);
                 io.sockets.connected_bchain_users.push({ user_id: tokenUser.userid, sockedID: socket.id });
                 socket.emit("ConnectedUsers", io.sockets.connected_bchain_users.length);
                 console.log(io.sockets.connected_bchain_users);
@@ -45,13 +44,13 @@ io.on('connection', (socket) => {
 
     });
 
-    socket.on('blockChainConnect', (data) => {
+    socket.on('blockchainUpload', (data) => {
         const tokenState = validateToken(data.token);
         if (!tokenState.includes("Error:")) {
             if (data.clientBlockChain) {
                 const blockchainUpdate = updateLatestBlockChain(data.clientBlockChain)
-                if (blockchainStatus.includes("Error:") || blockchainStatus.includes("Warning:")) {
-                    socket.emit("statusFail", blockchainUpdate);
+                if (blockchainUpdate.includes("Error:") || blockchainUpdate.includes("Warning:")) {
+                    socket.emit("uploadRejected", blockchainUpdate);
                 } else {
                     socket.broadcast.emit("shareUpdatedBlockChain", getBlockChain());
                 }
@@ -155,7 +154,7 @@ app.get("/transactions/", (req, res) => {
 
 // List all pending transactions
 app.get("/transactions/:userid", (req, res) => {
-    if (io.sockets.transactionList.length == 0) {
+    if (!io.sockets.transactionList || !io.sockets.transactionList.length) {        
         return res.send("No pending transactions")
     }
     getPendingTransactions(req.params.userid, res);
@@ -188,7 +187,7 @@ app.post("/blockdata", (req, res) => {
         data: { name, amount }
     });
 
-    return res.json({ status: "done", message: "Your Transaction is added to Queue. Queue ID #" + auto_id + "<br>View all pending transactions <a href='http://localhost:3000/transactions/" + tokenUser.userid + "' target='_blank'>here</a>" });
+    return res.json({ status: "done", message: "Your Transaction is added to Queue #" + auto_id + "<br>View all pending transactions <a href='http://localhost:3000/transactions/" + tokenUser.userid + "' target='_blank'>here</a>" });
 
 });
 
@@ -228,14 +227,15 @@ function getPendingTransactions(userid, resp) {
 }
 
 function updateLatestBlockChain(block_chain_json) {
-    if (!Array.isArray(block_chain_json)) {
+    const blockChain_client = block_chain_json.blockchain;
+    if (!Array.isArray(blockChain_client)) {
         return "Error: Blockchain not found"
     }
     const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
     tempBlockChain.clear();
 
-    for (let i = 0; i < block_chain_json.length; i++) {
-        const bchain = block_chain_json[i];
+    for (let i = 0; i < blockChain_client.length; i++) {
+        const bchain = blockChain_client[i];
         if (typeof bchain !== "object") {
             return "Error: Invalid Blockchain";
         }
@@ -261,7 +261,7 @@ function updateLatestBlockChain(block_chain_json) {
 }
 
 async function doTransactions() {
-    console.log("transaction processing for ID: " + io.sockets.transactionList[0].id);
+    console.log("transaction processing for Queue ID#" + io.sockets.transactionList[0].id);
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
     io.sockets.mainBlockChain.addBlock(index, user_data, nonce, timestamp, hash, prevHash, false); // Mining is set to FALSE    
@@ -269,7 +269,7 @@ async function doTransactions() {
     miningActive = false;
     console.log("Block Added");
     io.sockets.emit("latestBlockChain", {
-        chain: getBlockChain(),
+        bchain: getBlockChain(),
         remaining: io.sockets.transactionList.length,
         users: io.sockets.connected_bchain_users.length
     });
@@ -280,7 +280,7 @@ async function doTransactions() {
 
 function processBlockChain() {
     miningActive = true;
-    let lastBlock = io.sockets.mainBlockChain.lastBlock().get();
+    const lastBlock = io.sockets.mainBlockChain.lastBlock().get();
     return new Promise((resolve, reject) => {
         const worker = new Worker('./worker.js', { workerData: { blockIndex: lastBlock.index + 1, lastBlockHash: lastBlock.hash, transactionData: io.sockets.transactionList[0].data, difficultyLevel: DIFFICULTY, MASTER_KEY } });
         worker.on('message', resolve);
