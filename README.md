@@ -75,7 +75,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [5 July, 2020](https://github.com/dpak11/blockchain/commit/5f27c23263b9661077e7b9c8df660c89bb228e98)
+Last Update: [7 July, 2020](https://github.com/dpak11/blockchain/commit/cca4f95decc93ca27fca704101a065d166819f4c)
 
 
 
@@ -90,15 +90,15 @@ Last Update: [5 July, 2020](https://github.com/dpak11/blockchain/commit/5f27c232
 
 3) After installation is complete, run the command `npm start`.
 
-4) Use a Rest API tool such as [Postman](https://www.postman.com) to test following API's:
+4) Use a REST API tool such as [Postman](https://www.postman.com) to test following:
 
 	- First, Register with email ID and password
 
-		> POST `localhost:3000/register`
+		> POST `http://localhost:3000/register`
 
 	- Next, post data: `amount` and `name` along with the token that was generated during registeration
 
-		> POST `localhost:3000/blockdata`
+		> POST `http://localhost:3000/blockdata`
 
 	- You can check transaction status at:
 
@@ -106,5 +106,5 @@ Last Update: [5 July, 2020](https://github.com/dpak11/blockchain/commit/5f27c232
 
 	- Once your transaction is complete and added to blockchain, you can check updated blockchain at:
 
-		> GET `localhost:3000/blockchain`
+		> GET `http://localhost:3000/blockchain`
 
