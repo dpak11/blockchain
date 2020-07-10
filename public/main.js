@@ -99,9 +99,12 @@ function authSubmitForm(payload, restUrl) {
                 authenticateUser.remove();
                 document.getElementById("statusmsg").textContent = txtMsg;
                 initSocket();
+            } else if (res.status == "multiple_login") {
+                alert("Duplicate logIn detected");
             } else {
                 alert(res.status)
             }
+            
 
         });
 }
@@ -115,7 +118,7 @@ function insertTransactionFields() {
             <label for="amount">Amount:</label><input type="text" id="amount">
         </p>
         <br><br>
-        <input type="submit" value="Send Amount">`;
+        <input type="submit" value="Send">`;
     formDiv.innerHTML = formElts;
     userTransaction.appendChild(formDiv)
 
@@ -151,8 +154,9 @@ function getDownloadLink() {
 
 function initSocket() {
     socket = io();
-    socket.on('ConnectedUsers', (usersNum) => {
-        document.getElementById("total-users").textContent = "Users: " + usersNum;
+    socket.on('ConnectedUsers', (connUsers) => {
+        document.getElementById("total-users").textContent = " / Connected Users: " + connUsers.total;
+        document.getElementById("userIdTxt").textContent = "User ID: " + connUsers.id 
         insertTransactionFields();
         insertUploadButton();
     });
@@ -167,9 +171,15 @@ function initSocket() {
         alert("Received New BlockChain.")
 
     });
+
+    socket.on("totalUsersCount", (totalNum) => {
+        document.getElementById("total-users").textContent = " / Connected Users: " + totalNum;
+    });
+
     socket.on("uploadRejected", (errorStatus) => {
         alert(errorStatus);
     });
+
 
     socket.emit('addToUserList', { token: sessionStorage.getItem("token") });
 

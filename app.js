@@ -37,7 +37,8 @@ io.on('connection', (socket) => {
         if (!tokenUser.error) {
             if (!isDuplicateUser(tokenUser.userid)) {
                 io.sockets.connected_bchain_users.push({ user_id: tokenUser.userid, sockedID: socket.id });
-                socket.emit("ConnectedUsers", io.sockets.connected_bchain_users.length);
+                socket.emit("ConnectedUsers", {id: tokenUser.userid, total:io.sockets.connected_bchain_users.length});
+                socket.broadcast.emit("totalUsersCount",io.sockets.connected_bchain_users.length);
                 console.log(io.sockets.connected_bchain_users);
             }
         }
@@ -52,17 +53,18 @@ io.on('connection', (socket) => {
                 if (blockchainUpdate.includes("Error:") || blockchainUpdate.includes("Warning:")) {
                     socket.emit("uploadRejected", blockchainUpdate);
                 } else {
+                    console.log(blockchainUpdate);                    
                     socket.broadcast.emit("shareUpdatedBlockChain", getBlockChain());
                 }
 
             }
-        } else {
-            socket.emit("statusFail", tokenState);
-        }
+        } 
 
     });
+    
     socket.on('disconnect', () => {
         io.sockets.connected_bchain_users = io.sockets.connected_bchain_users.filter(conUser => conUser.sockedID !== socket.id);
+        socket.broadcast.emit("totalUsersCount",io.sockets.connected_bchain_users.length);
         console.log("disconnected:" + socket.id);
     });
 
@@ -239,7 +241,7 @@ function updateLatestBlockChain(block_chain_json) {
         if (typeof bchain !== "object") {
             return "Error: Invalid Blockchain";
         }
-        if (!bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
+        if (!bchain.user_data || !bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
             return "Error: Invalid Blockchain";
         }
 
@@ -289,8 +291,9 @@ function processBlockChain() {
             if (code !== 0)
                 reject(new Error(`Worker stopped with exit code ${code}`));
         })
-    })
+    });
 }
+
 
 
 const NEW_USER = {
