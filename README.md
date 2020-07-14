@@ -8,45 +8,6 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-1 : 
 
-1) API to add transaction into block chain.
-
-	> POST request to `http://localhost:3000/blockdata`
-
-
-	![Post blockdata API example](git_images/blockdata.jpg)
-
-	User Input will contain `amount, name, token` (token is generated during Login, registeration process, refer Phase-2 below).
-
-	This will generate individual block that will have `block index`, `timestamp`, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), `hash`, `previousHash`.
-
-2) API to fetch latest blockchain from network.
-
-	> GET request to `http://localhost:3000/blockchain`
-
-	Refer below example #3 to see the blockchain format.
-
-
-3) API to submit raw JSON data containing blockchain. Each block is validated before adding it to the main BlockChain
-
-	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
-
-	![Post blockchain API example](git_images/blockchain.jpg)
-
-	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API (example #2), we then submit our JSON data containing blockchain into the network. The network will start validating every individual block of all blockchains obtained from different users, and then updates the main blockchain array with latest valid blockchain.
-	
-
-	
-
-
-
-### Phase-2 : 
-
-- API to list all pending transactions that needs to be mined sequentially (and later added to blockchain).
-
-	To view all pending transactions for a particular userID:
-
-	> GET request to `http://localhost:3000/transactions/{userid}`
-
 	
 - API for User Registeration:
 
@@ -69,8 +30,50 @@ A blockchain web application that distributes `blockchain` between individual us
 	If Login verification is successful, you will receive a token
 
 
+- API to list all pending transactions waiting to be mined sequentially.
+
+	To view all pending transactions for a particular userID:
+
+	> GET request to `http://localhost:3000/transactions/{userid}`
+
 
 - Maintain a database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
+
+
+
+
+
+### Phase-2 : 
+
+- API to add transaction into block chain.
+
+	> POST request to `http://localhost:3000/blockdata`
+
+
+	![Post blockdata API example](git_images/blockdata.jpg)
+
+	User Input will contain `amount, name, token` (token is generated during Login, registeration process).
+
+	This will generate individual block that will have `block index`, `timestamp`, `user data`, [nonce(PoW)](https://www.bitcoinmining.com/what-is-proof-of-work), `hash`, `previousHash`.
+
+
+- API to fetch latest blockchain from network.
+
+	> GET request to `http://localhost:3000/blockchain`
+
+	Refer below example to see the blockchain format.
+
+
+- API to submit raw JSON data containing blockchain. Each block is validated before adding it to the main BlockChain
+
+	> POST request to `http://localhost:3000/blockchain?token={insert token here}`
+
+	![Post blockchain API example](git_images/blockchain.jpg)
+
+	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API, we then send our JSON data containing blockchain into the network. The network will start validating every individual block from all blockchains obtained from different users, and then updates the main blockchain with latest blockchain.
+
+
+
 
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
