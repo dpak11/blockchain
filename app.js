@@ -221,7 +221,7 @@ const NEW_USER = {
     getID: function() {
         let newID = this.generate();
         if(DUMMY_DB.some(user => user.userid == newID)){
-            this.get();
+            this.getID();
         }else{          
           return newID;  
         }        
