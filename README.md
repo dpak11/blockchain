@@ -78,7 +78,7 @@ A blockchain web application that distributes `blockchain` between individual us
 
 ### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [10 July, 2020](https://github.com/dpak11/blockchain/commit/b9f0bdff81ed8e941eb3e58e96576eff0b6d8d5a)
+Last Update: [23 July, 2020](https://github.com/dpak11/blockchain/commit/64c4662ee2eed602664cec72e60cf4b0c7138466)
 
 
 
