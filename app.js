@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MASTER_KEY = KEYS.masterKey;
-const DIFFICULTY = 4;
+const DIFFICULTY = 3;
 const DUMMY_DB = []; // for testing
 
 let auto_id = 0;
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
         if (!tokenState.includes("Error:")) {
             if (data.clientBlockChain) {
                 const blockchainUpdate = updateLatestBlockChain(data.clientBlockChain)
-                if (blockchainUpdate.includes("Error:") || blockchainUpdate.includes("Warning:")) {
+                if (blockchainUpdate.includes("Error:") || blockchainUpdate.includes("Alert:")) {
                     socket.emit("uploadRejected", blockchainUpdate);
                 } else {
                     console.log(blockchainUpdate);                    
@@ -252,17 +252,22 @@ function updateLatestBlockChain(block_chain_json) {
         }
     }
 
+    if(io.sockets.mainBlockChain.get().length == tempBlockChain.get().length){
+        return "Alert: Your copy of blockchain is already in Sync with Network"
+    }
+
     if (io.sockets.mainBlockChain.get().length < tempBlockChain.get().length) {
         if (miningActive) {
-            return "Warning: Mining is in progress. Can not accept BlockChain now"
+            return "Alert: Mining is in progress. Can not accept BlockChain now"
         }
         io.sockets.mainBlockChain = tempBlockChain;
         return tempBlockChain.get().length + " Blocks Added to BlockChain successfuly "
     }
-    return "Warning: Your copy of blockchain is not the latest"
+    
+    return "Alert: Your copy of blockchain is not the latest"
 }
 
-async function doTransactions() {
+async function processTransactions() {
     console.log("transaction processing for Queue ID#" + io.sockets.transactionList[0].id);
     const new_block = await processBlockChain();
     const { index, user_data, nonce, timestamp, hash, prevHash } = new_block.updated;
@@ -276,7 +281,6 @@ async function doTransactions() {
         users: io.sockets.connected_bchain_users.length
     });
     if (io.sockets.transactionList.length == 0) console.log("All transactions done");
-    return;
 
 }
 
@@ -319,7 +323,7 @@ const NEW_USER = {
 let queueInterval = setInterval(function() {
     if(io.sockets.transactionList){
         if (io.sockets.transactionList.length && !miningActive) {
-            doTransactions();
+            processTransactions();
         }
     }
     
