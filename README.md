@@ -1,9 +1,12 @@
 # Blockchain
 
 
-A blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
+Blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> This is a work-in-progress, currently in Phase-3 Development
+> Status: Work-in-progress, currently in Phase-4 Development
+
+
+(In Phases 1 and 2 we will simply create API's for testing the core blockchain functionality. You will need a REST API tool like [Postman](https://www.postman.com) to test this)
 
 
 ### Phase-1 : 
@@ -37,7 +40,7 @@ A blockchain web application that distributes `blockchain` between individual us
 	> GET request to `http://localhost:3000/transactions/{userid}`
 
 
-- Maintain a database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
+- Maintain a dummy database containing `email`, hashed `password` and unique `userID` of registered BlockChain users.
 
 
 
@@ -76,16 +79,20 @@ A blockchain web application that distributes `blockchain` between individual us
 
 
 
-### Phase-3 : Decentralisation - [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
+### Phase-3 : Decentralisation [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
 Last Update: [23 July, 2020](https://github.com/dpak11/blockchain/commit/64c4662ee2eed602664cec72e60cf4b0c7138466)
 
+
+### Phase-4 : Decentralisation + Transfer Amount from one user account to another.
+
+> Status: Branch created. Coding to begin.
 
 
 
 ---
 
-## To test Blockchain (Phase-2):
+## How to test Blockchain (Phase-1 and Phase-2):
 
 1) Download or clone this repository into a new directory in your Local.
 
