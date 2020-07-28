@@ -118,7 +118,7 @@ function insertTransactionFields() {
             <label for="amount">Amount:</label><input type="text" id="amount">
         </p>
         <br><br>
-        <input type="submit" value="Send">`;
+        <input type="submit" value="Submit">`;
     formDiv.innerHTML = formElts;
     userTransaction.appendChild(formDiv)
 
