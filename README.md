@@ -1,12 +1,16 @@
 # Blockchain
 
 
-Blockchain web application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
+Simple web application that distributes `blockchain` between registered users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> Status: Work-in-progress, currently in Phase-4 Development
+> Status: Work-in-progress (currently in Phase-4 Development)
 
 
-(In Phases 1 and 2 we will simply create API's for testing the core blockchain functionality. You will need a REST API tool like [Postman](https://www.postman.com) to test this)
+Note: In Phases 1 and 2 we simply create API's for testing the core blockchain functionality using REST API tool like [Postman](https://www.postman.com). 
+
+Phase-3 will contain a basic UI that will allow user to submit data into blockchain through browser. We start implementing Decentralisation in this phase where registered users can download and upload validated blockchains into the network.
+
+Phase-4 is where we fill up the remaining parts of decentralisation and allow manual selection of individual user IDs to transfer amount between users. 
 
 
 ### Phase-1 : 
@@ -84,7 +88,7 @@ Blockchain web application that distributes `blockchain` between individual user
 Last Update: [23 July, 2020](https://github.com/dpak11/blockchain/commit/64c4662ee2eed602664cec72e60cf4b0c7138466)
 
 
-### Phase-4 : Decentralisation + Transfer Amount from one user account to another.
+### Phase-4 : Decentralisation + Amount Transfer
 
 > Status: Branch created. Coding to begin.
 
