@@ -1,7 +1,7 @@
 # Blockchain (Phase-3)
 
 
-A decentralised blockchain application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
+We start implementing Decentralisation in this phase where registered users can download and upload validated blockchains into the network.
 
 
 ## How to Test BlockChain:
