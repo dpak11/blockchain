@@ -1,4 +1,8 @@
-// Documentation on Usage of Tokie is available here --->  https://github.com/dpak11/tokie
+/*
+
+Tokie Documentation is available here >>  https://github.com/dpak11/tokie
+
+*/
 
 const { SHA256 } = require('crypto-js');
 
@@ -101,7 +105,7 @@ function testPass(secret){
 }
 
 
-function create({data, secretKey, expiresIn = "30m", response = null }) {
+function create({data, secretKey, expiresIn = "30m"}) {
 
     let testPswd = testPass(secretKey);
     if(testPswd !== "strong"){
@@ -129,13 +133,7 @@ function create({data, secretKey, expiresIn = "30m", response = null }) {
         expire: setExpiry
     };
     let enc_data = Buffer.from(JSON.stringify(encodeHashed)).toString('base64');
-    if (response != null) {
-        response.set('Access-Control-Allow-Headers', 'Authorization');
-        response.set('Access-Control-Request-Headers', 'Authorization');
-        response.set('Access-Control-Expose-Headers', 'Authorization');
-        response.header("Authorization", `Bearer ${enc_data}`);
-         
-    } 
+    
     return {
         error: false,
         status: "ok",
