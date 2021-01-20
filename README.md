@@ -77,7 +77,7 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 
 	![Post blockchain API example](git_images/blockchain.jpg)
 
-	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API, we then send our JSON data containing blockchain into the network. The network will start validating every individual block from all blockchains obtained from different users, and then updates the main blockchain with latest blockchain.
+	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API, we can send our JSON data containing the blockchain into the network. The network will start validating every individual block obtained from all users, and then updates the main blockchain with the latest one.
 
 
 
