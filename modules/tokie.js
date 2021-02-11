@@ -9,10 +9,11 @@ const { SHA256 } = require('crypto-js');
 function encodeData(data, hKey) {
 
     // Example:
-    // if uniqueSequence      =      "3grj7ey48f/10vu"
+    // If uniqueSequence      =      "3grj7ey48f/10vu"
     // then, reverseUnique    =      "uv01/f84ye7jrg3";
-    // base64data             =      "7gywesadasew423uhd"
-    // loop through base64data, replace all occurences of '7' in base64Data by '/'('7' is at 10th position in reverseUnique, which again corresponds to '/' in uniqueSequence).
+    // If base64data          =      "7gywesadasew423uhd"
+
+    // loop through every character in base64data, replace all occurences of '7' in base64Data by '/' (because '7' is at 10th position in reverseUnique, which corresponds to '/' in uniqueSequence).
     // Similarly 'g' relaced by 'v', 'y' replaced by '8' and so on...
     let uniqueSequence = getUniqueKey(hKey);
     let b64Data = Buffer.from(JSON.stringify(data), 'binary').toString('base64');
