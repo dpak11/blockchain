@@ -155,7 +155,7 @@ function getDownloadLink() {
 function initSocket() {
     socket = io();
     socket.on('ConnectedUsers', (connUsers) => {
-        document.getElementById("total-users").textContent = " / Connected Users: " + connUsers.total;
+        document.getElementById("total-users").textContent = "Connected Users: " + connUsers.total;
         document.getElementById("userIdTxt").textContent = "User ID: " + connUsers.id 
         insertTransactionFields();
         insertUploadButton();
@@ -166,14 +166,14 @@ function initSocket() {
         const downloader = getDownloadLink();
         downloader.href = URL.createObjectURL(bcFile);
         downloader.download = "blockchain.text";
-        document.getElementById("pendings").textContent = " / Pending Transactions: " + latest.remaining;
+        document.getElementById("pendings").textContent = "Pending Transactions: " + latest.remaining;
         document.getElementById("total-users").textContent = "Users: " + latest.users;
         alert("Received New BlockChain.")
 
     });
 
     socket.on("totalUsersCount", (totalNum) => {
-        document.getElementById("total-users").textContent = " / Connected Users: " + totalNum;
+        document.getElementById("total-users").textContent = "Connected Users: " + totalNum;
     });
 
     socket.on("uploadRejected", (errorStatus) => {
