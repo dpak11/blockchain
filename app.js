@@ -126,10 +126,8 @@ app.post("/checktoken", (req, res) => {
 
 function isDuplicateUser(userid) {
     if (io.sockets.connected_bchain_users) {
-        const existingUser = io.sockets.connected_bchain_users.filter(connected => connected.user_id == userid);
-        if (existingUser.length) {
-            return true
-        }
+        const duplicate = io.sockets.connected_bchain_users.some(connected => connected.user_id == userid);
+        if (duplicate)  return true        
     }
     return false
 }
@@ -189,7 +187,7 @@ app.post("/blockdata", (req, res) => {
         data: { name, amount }
     });
 
-    return res.json({ status: "done", message: "Your Transaction is added to Queue #" + auto_id + "<br>View all pending transactions <a href='http://localhost:3000/transactions/" + tokenUser.userid + "' target='_blank'>here</a>" });
+    return res.json({ status: "done", message: `Your Transaction is added to Queue # ${auto_id} <br>View all pending transactions <a href='http://localhost:3000/transactions/${tokenUser.userid}' target='_blank'>here</a>` });
 
 });
 
