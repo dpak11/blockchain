@@ -85,7 +85,7 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 
 ### Phase-3 : Decentralisation [Go to this branch](https://github.com/dpak11/blockchain/tree/decentralised)
 
-Last Update: [20 March, 2021](https://github.com/dpak11/blockchain/commit/e2f9a8dfea4106e4c6a4cc0d69e50f76b7f71611)
+Last Update: [21 March, 2021](https://github.com/dpak11/blockchain/commit/a8b98df6749b5b2031f9d68d309708c6ab3d5bef)
 
 
 ### Phase-4 : Decentralisation + Amount Transfer
