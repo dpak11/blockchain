@@ -230,10 +230,10 @@ function getPendingTransactions(userid, resp) {
   });
 }
 
-function updateLatestBlockChain(block_chain_json) {
-  const blockChain_client = block_chain_json.blockchain;
+function validateClientBlocks(newBlocks){
+  const blockChain_client = newBlocks;
   if (!Array.isArray(blockChain_client)) {
-    return "Error: Blockchain not found";
+    return {error: "Error: Blockchain not found"};
   }
   const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
   tempBlockChain.clear();
@@ -241,10 +241,10 @@ function updateLatestBlockChain(block_chain_json) {
   for (let i = 0; i < blockChain_client.length; i++) {
     const bchain = blockChain_client[i];
     if (typeof bchain !== "object") {
-      return "Error: Invalid Blockchain";
+      return {error: "Error: Invalid Blockchain"};
     }
     if (!bchain.user_data || !bchain.hash || typeof bchain.prevHash == "undefined" || !bchain.timestamp || typeof bchain.nonce == "undefined") {
-      return "Error: Invalid Blockchain";
+      return {error: "Error: Invalid Blockchain"};
     }
 
     let userData = {
@@ -253,21 +253,28 @@ function updateLatestBlockChain(block_chain_json) {
     };
     tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp,bchain.hash,bchain.prevHash,false); // Mining is set to FALSE
     if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
-      return "Error: Invalid Blockchain";
+      return {error: "Error: Invalid Blockchain"};
     }
   }
+  return {validated: tempBlockChain};
+} 
 
-  if (IOsocket.sockets.mainBlockChain.get().length == tempBlockChain.get().length) {
+function updateLatestBlockChain(block_chain_json) {
+  const clientBlocks = validateClientBlocks(block_chain_json.blockchain)
+  if(clientBlocks.error) return clientBlocks.error;
+
+  const validatedBlocks = clientBlocks.validated.get();
+  if (IOsocket.sockets.mainBlockChain.get().length == validatedBlocks.length) {
     return "Alert: Your copy of blockchain is already in Sync with Network";
   }
 
-  if (IOsocket.sockets.mainBlockChain.get().length < tempBlockChain.get().length) {
+  if (IOsocket.sockets.mainBlockChain.get().length < validatedBlocks.length) {
     if (miningActive) {
       return "Alert: Mining is in progress. Can not accept BlockChain now";
     }
-    IOsocket.sockets.mainBlockChain = tempBlockChain;
+    IOsocket.sockets.mainBlockChain = clientBlocks.validated;
     return (
-      tempBlockChain.get().length + " Blocks Added to BlockChain successfuly "
+      validatedBlocks.length + " Blocks Added to BlockChain successfuly "
     );
   }
 
