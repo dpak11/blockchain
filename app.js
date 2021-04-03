@@ -19,6 +19,7 @@ const DUMMY_DB = []; // for testing
 
 let autoID = 0;
 let miningActive = false;
+let latestHash = "";
 
 IOsocket.on("connection", (socket) => {
   console.log("New socket connection", socket.id);
@@ -237,6 +238,7 @@ function validateClientBlocks(newBlocks){
   }
   const tempBlockChain = BlockChain(DIFFICULTY, MASTER_KEY);
   tempBlockChain.clear();
+  let hashMatch = latestHash.length>10 ? false : true;
 
   for (let i = 0; i < blockChain_client.length; i++) {
     const bchain = blockChain_client[i];
@@ -247,15 +249,22 @@ function validateClientBlocks(newBlocks){
       return {error: "Error: Invalid Blockchain"};
     }
 
-    let userData = {
+    const userData = {
       name: bchain.user_data.name,
       amount: bchain.user_data.amount,
     };
+    
     tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp,bchain.hash,bchain.prevHash,false); // Mining is set to FALSE
     if (!tempBlockChain.isValid(tempBlockChain.lastBlock())) {
       return {error: "Error: Invalid Blockchain"};
     }
+    
+    if(bchain.hash === latestHash){
+      hashMatch = true;
+    }
+    
   }
+  if(!hashMatch) return {error: "Error: Latest Hash Missing"};
   return {validated: tempBlockChain};
 } 
 
@@ -268,11 +277,13 @@ function updateLatestBlockChain(block_chain_json) {
     return "Alert: Your copy of blockchain is already in Sync with Network";
   }
 
-  if (IOsocket.sockets.mainBlockChain.get().length < validatedBlocks.length) {
+  if (IOsocket.sockets.mainBlockChain.get().length < validatedBlocks.length) {    
     if (miningActive) {
       return "Alert: Mining is in progress. Can not accept BlockChain now";
     }
     IOsocket.sockets.mainBlockChain = clientBlocks.validated;
+    latestHash = validatedBlocks[validatedBlocks.length-1].get().hash;
+    console.log("latest::",latestHash);
     return (
       validatedBlocks.length + " Blocks Added to BlockChain successfuly "
     );
@@ -289,6 +300,7 @@ async function processTransactions() {
   const {index,user_data, nonce, timestamp, hash, prevHash} = new_block.updated;
   IOsocket.sockets.mainBlockChain.addBlock(index, user_data, nonce,timestamp,hash, prevHash, false); // Mining is set to FALSE
   IOsocket.sockets.transactionList.splice(0, 1);
+  latestHash = hash;
   miningActive = false;
   console.log("Block Added");
   IOsocket.sockets.emit("latestBlockChain", {
