@@ -172,6 +172,7 @@ function initSocket() {
 
     });
 
+    
     socket.on("totalUsersCount", (totalNum) => {
         document.getElementById("total-users").textContent = "Connected Users: " + totalNum;
     });

@@ -43,7 +43,14 @@ IOsocket.on("connection", (socket) => {
           id: tokenUser.userid,
           total: IOsocket.sockets.connected_bchain_users.length,
         });
-        socket.broadcast.emit("totalUsersCount",IOsocket.sockets.connected_bchain_users.length);
+        //socket.broadcast.emit("totalUsersCount",IOsocket.sockets.connected_bchain_users.length);
+        if(IOsocket.sockets.mainBlockChain.get().length>1){
+          socket.emit("latestBlockChain", {
+            bchain: getBlockChain(),
+            remaining: IOsocket.sockets.transactionList.length,
+            users: IOsocket.sockets.connected_bchain_users.length,
+          });
+        }        
         console.log(IOsocket.sockets.connected_bchain_users);
       }
     }
@@ -58,7 +65,7 @@ IOsocket.on("connection", (socket) => {
           socket.emit("uploadRejected", blockchainUpdate);
         } else {
           console.log(blockchainUpdate);
-          socket.broadcast.emit("shareUpdatedBlockChain", getBlockChain());
+         // socket.broadcast.emit("shareBlockChain", getBlockChain());
         }
       }
     }
