@@ -7,111 +7,117 @@ let socket = null;
 
 const token = sessionStorage.getItem("token") || null;
 if (token) {
-    fetch("../checktoken/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) })
-        .then(data => data.json())
-        .then((res) => {
-            if (res.status == "valid") {
-                document.getElementById("statusmsg").textContent = "You are logged In";
-                authenticateUser.remove();
-                initSocket();
-            } else if (res.status == "multiple_login") {
-                alert("Duplicate logIn detected");
-            } else {
-                sessionStorage.removeItem("token")
-            }
-
-        })
+  fetch("../checktoken/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  })
+    .then((data) => data.json())
+    .then((res) => {
+      if (res.status == "valid") {
+        document.getElementById("statusmsg").textContent = "You are logged In";
+        authenticateUser.remove();
+        initSocket();
+      } else if (res.status == "multiple_login") {
+        alert("Duplicate logIn detected");
+      } else {
+        sessionStorage.removeItem("token");
+      }
+    });
 }
 
-registerBtn.addEventListener("click", function(e) {
-    labelText.textContent = "User Email:";
+registerBtn.addEventListener("click", function (e) {
+  labelText.textContent = "User Email:";
 });
 
-loginBtn.addEventListener("click", function(e) {
-    labelText.textContent = "User ID:";
-})
-
-authenticateUser.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = authenticateUser.UserEmail.value;
-    const password = authenticateUser.UserPswd.value;
-    const registerBtn = document.getElementById("register");
-    let restUrl = "../login";
-    let payload = { userid: email, email, password }
-    if (registerBtn.checked) {
-        restUrl = "../register";
-
-    }
-    if (email.trim() !== "" && password.trim() !== "") {
-        authSubmitForm(payload, restUrl)
-    } else {
-        alert("Field(s) are empty")
-    }
+loginBtn.addEventListener("click", function (e) {
+  labelText.textContent = "User ID:";
 });
 
-userTransaction.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const payload = {
-        name: userTransaction.personName.value,
-        amount: userTransaction.amount.value,
-        token: sessionStorage.getItem("token")
-    };
-
-    fetch("../blockdata", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(data => data.json())
-        .then((res) => {
-            if (res.status == "done") {
-                document.getElementById("statusmsg").innerHTML = res.message;
-                userTransaction.reset();
-            } else {
-                alert(res.status)
-            }
-        });
-
+authenticateUser.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const email = authenticateUser.UserEmail.value;
+  const password = authenticateUser.UserPswd.value;
+  const registerBtn = document.getElementById("register");
+  let restUrl = "../login";
+  let data = { userid: email, email, password };
+  if (registerBtn.checked) {
+    restUrl = "../register";
+  }
+  if (email.trim() !== "" && password.trim() !== "") {
+    authSubmitForm(data, restUrl);
+  } else {
+    alert("Field(s) are empty");
+  }
 });
 
+userTransaction.addEventListener("submit", function (e) {
+  e.preventDefault();
+  fetch("../blockdata", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: userTransaction.personName.value,
+      amount: userTransaction.amount.value,
+      token: sessionStorage.getItem("token")
+    })
+  })
+    .then((data) => data.json())
+    .then((res) => {
+      if (res.status == "done") {
+        document.getElementById("statusmsg").innerHTML = res.message;
+        userTransaction.reset();
+        document.getElementById("personName").focus();
+      } else {
+        alert(res.status);
+      }
+    });
+});
 
 function uploadBlockChainFile(file) {
-    let reader = new FileReader();
-    reader.onload = function(event) {
-        let contents = JSON.parse(event.target.result);
-        console.log(contents);
-        socket.emit('blockchainUpload', { clientBlockChain: contents, token: sessionStorage.getItem("token") });
-    };
+  let reader = new FileReader();
+  reader.onload = function (event) {
+    let contents = JSON.parse(event.target.result);
+    console.log(contents);
+    socket.emit("blockchainUpload", {
+      clientBlockChain: contents,
+      token: sessionStorage.getItem("token"),
+    });
+  };
 
-    reader.readAsText(file);
-
+  reader.readAsText(file);
 }
 
-
 function authSubmitForm(payload, restUrl) {
-    fetch(restUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(data => data.json())
-        .then((res) => {
-            if (res.status == "done") {
-                sessionStorage.setItem("token", res.token);
-                let txtMsg = "";
-                if (restUrl.includes("register")) {
-                    txtMsg = `Generated User ID is: ${res.userID}.  Token saved successfuly!`
-                } else {
-                    txtMsg = "You have successfuly logged In"
-                }
-                authenticateUser.remove();
-                document.getElementById("statusmsg").textContent = txtMsg;
-                initSocket();
-            } else if (res.status == "multiple_login") {
-                alert("Duplicate logIn detected");
-            } else {
-                alert(res.status)
-            }
-            
-
-        });
+  fetch(restUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+    .then((data) => data.json())
+    .then((res) => {
+      if (res.status == "done") {
+        sessionStorage.setItem("token", res.token);
+        let txtMsg = "";
+        if (restUrl.includes("register")) {
+          txtMsg = `Generated User ID is: ${res.userID}.  Token saved successfuly!`;
+        } else {
+          txtMsg = "You have successfuly logged In";
+        }
+        authenticateUser.remove();
+        document.getElementById("statusmsg").textContent = txtMsg;
+        initSocket();
+      } else if (res.status == "multiple_login") {
+        alert("Duplicate logIn detected");
+      } else {
+        alert(res.status);
+      }
+    });
 }
 
 function insertTransactionFields() {
-    const formDiv = document.createElement("div");
-    const formElts = `<p>
+  const formDiv = document.createElement("div");
+  const formElts = `<p>
             <label for="personName">Name:</label><input type="text" id="personName">
         </p>
         <p>
@@ -119,69 +125,66 @@ function insertTransactionFields() {
         </p>
         <br><br>
         <input type="submit" value="Submit">`;
-    formDiv.innerHTML = formElts;
-    userTransaction.appendChild(formDiv)
-
+  formDiv.innerHTML = formElts;
+  userTransaction.appendChild(formDiv);
 }
 
 function insertUploadButton() {
-    const paraElt = document.createElement("p");
-    paraElt.innerHTML = `<input type="file" id="uploadFile" accept="text/plain" />
+  const paraElt = document.createElement("p");
+  paraElt.innerHTML = `<input type="file" id="uploadFile" accept="text/plain" />
         <label for="uploadFile">Upload Blockchain</label>`;
-    document.body.appendChild(paraElt);
-    const blockchainUpload = document.getElementById("uploadFile");
-    blockchainUpload.addEventListener("change", function(evt) {
-        uploadBlockChainFile(evt.target.files[0]);
-    });
+  document.body.appendChild(paraElt);
+  const blockchainUpload = document.getElementById("uploadFile");
+  blockchainUpload.addEventListener("change", function (evt) {
+    uploadBlockChainFile(evt.target.files[0]);
+  });
 
-    console.log("inserted uploader button");
-
+  console.log("inserted uploader button");
 }
-
 
 function getDownloadLink() {
-    let downloadLink = document.getElementById("bc_download");
-    if (!downloadLink) {
-        const paraElt = document.createElement("p");
-        paraElt.innerHTML = `<a id="bc_download" href="" download="blockchain">Download Blockchain</a>`;
-        document.body.appendChild(paraElt);
-        downloadLink = document.getElementById("bc_download")
-    }
-    return downloadLink;
-
+  let downloadLink = document.getElementById("bc_download");
+  if (!downloadLink) {
+    const paraElt = document.createElement("p");
+    paraElt.innerHTML = `<a id="bc_download" href="" download="blockchain">Download Blockchain</a>`;
+    document.body.appendChild(paraElt);
+    downloadLink = document.getElementById("bc_download");
+  }
+  return downloadLink;
 }
 
-
 function initSocket() {
-    socket = io();
-    socket.on('ConnectedUsers', (connUsers) => {
-        document.getElementById("total-users").textContent = "Connected Users: " + connUsers.total;
-        document.getElementById("userIdTxt").textContent = "User ID: " + connUsers.id 
-        insertTransactionFields();
-        insertUploadButton();
-    });
-    socket.on('latestBlockChain', (latest) => {
-        const blockchainString = JSON.stringify(latest.bchain);       
-        const bcFile = new Blob([blockchainString], { type: "text/plain" });
-        const downloader = getDownloadLink();
-        downloader.href = URL.createObjectURL(bcFile);
-        downloader.download = "blockchain.text";
-        document.getElementById("pendings").textContent = "Pending Transactions: " + latest.remaining;
-        document.getElementById("total-users").textContent = "Users: " + latest.users;
-        alert("Received New BlockChain.")
+  socket = io();
+  socket.on("ConnectedUsers", (connUsers) => {
+    document.getElementById("total-users").textContent =
+      "Connected Users: " + connUsers.total;
+    document.getElementById("userIdTxt").textContent =
+      "User ID: " + connUsers.id;
+    insertTransactionFields();
+    insertUploadButton();
+  });
 
-    });
+  socket.on("latestBlockChain", (latest) => {
+    const blockchainString = JSON.stringify(latest.bchain);
+    const bcFile = new Blob([blockchainString], { type: "text/plain" });
+    const downloader = getDownloadLink();
+    downloader.href = URL.createObjectURL(bcFile);
+    downloader.download = "blockchain.text";
+    document.getElementById("pendings").textContent =
+      "Pending Transactions: " + latest.remaining;
+    document.getElementById("total-users").textContent =
+      "Users: " + latest.users;
+    alert("Received New BlockChain.");
+  });
 
-    
-    socket.on("totalUsersCount", (totalNum) => {
-        document.getElementById("total-users").textContent = "Connected Users: " + totalNum;
-    });
+  socket.on("totalUsersCount", (totalNum) => {
+    document.getElementById("total-users").textContent =
+      "Connected Users: " + totalNum;
+  });
 
-    socket.on("uploadRejected", (errorStatus) => {
-        alert(errorStatus);
-    });
+  socket.on("uploadRejected", (errorStatus) => {
+    alert(errorStatus);
+  });
 
-
-    socket.emit('addToUserList', { token: sessionStorage.getItem("token") });
-
+  socket.emit("addToUserList", { token: sessionStorage.getItem("token") });
 }
