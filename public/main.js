@@ -5,26 +5,6 @@ const userTransaction = document.querySelector("#userTransaction");
 const labelText = document.querySelector("label[for=UserEmail]");
 let socket = null;
 
-const token = sessionStorage.getItem("token") || null;
-if (token) {
-  fetch("../checktoken/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token })
-  })
-    .then((data) => data.json())
-    .then((res) => {
-      if (res.status == "valid") {
-        document.getElementById("statusmsg").textContent = "You are logged In";
-        authenticateUser.remove();
-        initSocket();
-      } else if (res.status == "multiple_login") {
-        alert("Duplicate logIn detected");
-      } else {
-        sessionStorage.removeItem("token");
-      }
-    });
-}
 
 registerBtn.addEventListener("click", function (e) {
   labelText.textContent = "User Email:";
@@ -33,6 +13,13 @@ registerBtn.addEventListener("click", function (e) {
 loginBtn.addEventListener("click", function (e) {
   labelText.textContent = "User ID:";
 });
+
+
+userTransaction.addEventListener("submit", function (e) {
+  e.preventDefault();
+  submitTransactionData();  
+});
+
 
 authenticateUser.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -51,9 +38,37 @@ authenticateUser.addEventListener("submit", function (e) {
   }
 });
 
-userTransaction.addEventListener("submit", function (e) {
-  e.preventDefault();
-  fetch("../blockdata", {
+
+const showMessage = {
+  text: function (elt, msg) {
+    document.querySelector(elt).textContent = msg;
+  },
+  html: function (elt, msg) {
+    document.querySelector(elt).innerHTML = msg;
+  }
+};
+
+const checkTokenValidity = async () => {
+  const postToken = await fetch("../checktoken/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+
+  const response = await postToken.json();
+  if (response.status == "valid") {
+    showMessage.text("#statusmsg", "You are logged In");
+    authenticateUser.remove();
+    initSocket();
+  } else if (response.status == "multiple_login") {
+    alert("Duplicate logIn detected");
+  } else {
+    sessionStorage.removeItem("token");
+  }
+};
+
+const submitTransactionData = async () => {
+  const submitData = await fetch("../blockdata", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -61,18 +76,45 @@ userTransaction.addEventListener("submit", function (e) {
       amount: userTransaction.amount.value,
       token: sessionStorage.getItem("token")
     })
-  })
-    .then((data) => data.json())
-    .then((res) => {
-      if (res.status == "done") {
-        document.getElementById("statusmsg").innerHTML = res.message;
-        userTransaction.reset();
-        document.getElementById("personName").focus();
-      } else {
-        alert(res.status);
-      }
-    });
-});
+  });
+  const response = await submitData.json();
+  if (response.status == "done") {
+    userTransaction.reset();
+    showMessage.html("#statusmsg", response.message);
+    document.getElementById("personName").focus();
+  } else {
+    alert(response.status);
+  }
+}
+
+const authSubmitForm = async (payload, restUrl) => {
+  const authSubmit = await fetch(restUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const response = await authSubmit.json();
+  if (response.status == "done") {
+    sessionStorage.setItem("token", response.token);
+    let txtMsg = "";
+    if (restUrl.includes("register")) {
+      txtMsg = `Generated User ID is: ${response.userID}.  Token saved successfuly!`;
+    } else {
+      txtMsg = "You have successfuly logged In";
+    }
+    
+    showMessage.text("#statusmsg", txtMsg);
+    authenticateUser.remove();
+    initSocket();
+  } else if (response.status == "multiple_login") {
+    alert("Duplicate logIn detected");
+  } else {
+    alert(response.status);
+  }
+    
+}
+
+
 
 function uploadBlockChainFile(file) {
   let reader = new FileReader();
@@ -88,32 +130,6 @@ function uploadBlockChainFile(file) {
   reader.readAsText(file);
 }
 
-function authSubmitForm(payload, restUrl) {
-  fetch(restUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  })
-    .then((data) => data.json())
-    .then((res) => {
-      if (res.status == "done") {
-        sessionStorage.setItem("token", res.token);
-        let txtMsg = "";
-        if (restUrl.includes("register")) {
-          txtMsg = `Generated User ID is: ${res.userID}.  Token saved successfuly!`;
-        } else {
-          txtMsg = "You have successfuly logged In";
-        }
-        authenticateUser.remove();
-        document.getElementById("statusmsg").textContent = txtMsg;
-        initSocket();
-      } else if (res.status == "multiple_login") {
-        alert("Duplicate logIn detected");
-      } else {
-        alert(res.status);
-      }
-    });
-}
 
 function insertTransactionFields() {
   const formDiv = document.createElement("div");
@@ -153,13 +169,12 @@ function getDownloadLink() {
   return downloadLink;
 }
 
+
 function initSocket() {
   socket = io();
   socket.on("ConnectedUsers", (connUsers) => {
-    document.getElementById("total-users").textContent =
-      "Connected Users: " + connUsers.total;
-    document.getElementById("userIdTxt").textContent =
-      "User ID: " + connUsers.id;
+    showMessage.text("#total-users", "Connected Users: " + connUsers.total);
+    showMessage.text("#userIdTxt", "User ID: " + connUsers.id);
     insertTransactionFields();
     insertUploadButton();
   });
@@ -170,16 +185,13 @@ function initSocket() {
     const downloader = getDownloadLink();
     downloader.href = URL.createObjectURL(bcFile);
     downloader.download = "blockchain.text";
-    document.getElementById("pendings").textContent =
-      "Pending Transactions: " + latest.remaining;
-    document.getElementById("total-users").textContent =
-      "Users: " + latest.users;
+    showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);
+    showMessage.text("#total-users", "Users: " + latest.users);
     alert("Received New BlockChain.");
   });
 
   socket.on("totalUsersCount", (totalNum) => {
-    document.getElementById("total-users").textContent =
-      "Connected Users: " + totalNum;
+    showMessage.text("#total-users", "Connected Users: " + totalNum);
   });
 
   socket.on("uploadRejected", (errorStatus) => {
@@ -188,3 +200,6 @@ function initSocket() {
 
   socket.emit("addToUserList", { token: sessionStorage.getItem("token") });
 }
+
+const token = sessionStorage.getItem("token") || null;
+if (token) checkTokenValidity();

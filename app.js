@@ -42,8 +42,7 @@ IOsocket.on("connection", (socket) => {
         socket.emit("ConnectedUsers", {
           id: tokenUser.userid,
           total: IOsocket.sockets.connected_bchain_users.length,
-        });
-        //socket.broadcast.emit("totalUsersCount",IOsocket.sockets.connected_bchain_users.length);
+        });        
         if(IOsocket.sockets.mainBlockChain.get().length>1){
           socket.emit("latestBlockChain", {
             bchain: getBlockChain(),
