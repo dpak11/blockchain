@@ -3,7 +3,7 @@
 
 Simple web application that distributes `blockchain` between registered users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> Status: Work-in-progress (currently in Phase-4 Development)
+> Status: Work-in-progress (Phase 3 complete, Phase-4 to begin)
 
 
 Note: In Phases 1 and 2 we simply create API's for testing the core blockchain functionality using REST API tool like [Postman](https://www.postman.com). 
