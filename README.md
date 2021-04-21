@@ -1,7 +1,6 @@
 # Blockchain (Phase-4)
 
 
-A decentralised blockchain application that distributes `blockchain` between individual users, and manages transaction records, thereby eliminating the need of a Server for storing Blockchain, transaction details in any form.
+Display full list of registered blockchain users who are connected to the network. Distribute the `blockchain` between these users, and keep track of transactions
 
 
-> Status: Coding to begin (On Hold)
