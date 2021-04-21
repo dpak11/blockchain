@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlockChain User Page</title>
+    <style>
+
+      #allUsers{
+        display: flex;
+        min-width: 300px;
+         width: 40%;
+      }
+      #allUsers p{
+        border: solid 1px gray;
+       padding: 2px 8px;
+        margin-right: 5px;
+        margin-top: 0;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #allUsers p:hover{
+        background-color: #eae2e4;
+      }
+
+      #total-users{margin-bottom: 0;}
+      form {
+        border: 1px solid gray;
+        padding: 10px;
+        width: 500px;
+      }
+
+      form p {
+        display: flex;
+      }
+      form p label,
+      form p input {
+        width: 150px;
+      }
+
+      #userIdTxt {
+        font-weight: bold;
+      }
+
+      .status-head {
+        display: flex;
+        justify-content: space-between;
+        width: 30%;
+        min-width: 450px;
+        margin-bottom: 0;
+      }
+
+      #uploadFile {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+      }
+
+      #uploadFile + label,
+      #bc_download {
+        font-size: 1em;
+        color: #e6e6f1;
+        background-color: #5d6b9d;
+        display: inline-block;
+        padding: 5px 8px;
+        border-radius: 4px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      #uploadFile:focus + label,
+      #uploadFile + label:hover {
+        background-color: #7482d0;
+      }
+
+      #uploadFile:focus + label {
+        outline: 1px dotted #000;
+        outline: -webkit-focus-ring-color auto 5px;
+      }
+    </style>
+    <!-- <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+     -->
+  </head>
+
+  <body>
+    <p class="status-head">
+      <span id="userIdTxt"></span>
+     
+      <span id="pendings"></span>
+    </p>
+    <p id="total-users"></p>
+    <div id="allUsers">
+      
+    </div>
+    <form id="authenticateUser">
+      <p>
+        <label for="UserEmail">User Email:</label><input type="text" id="UserEmail" />
+      </p>
+      <p>
+        <label for="UserPswd">Password:</label><input type="password" id="UserPswd" />
+      </p>
+      <input type="radio" id="register" value="register" checked name="logType" /><label for="register">Register</label>
+      <input type="radio" id="signin" value="signin" name="logType" /><label for="signin">Login</label>
+      <br /><br />
+      <input type="submit" value="Submit" />
+    </form>
+    <form id="userTransaction"></form>
+    <p>
+      <span id="statusmsg"></span>
+    </p>
+    <!-- <script src="myworker.js"></script> -->
+    <script src="socket.io.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
