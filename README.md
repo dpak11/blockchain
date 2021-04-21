@@ -3,7 +3,7 @@
 
 Simple web application that distributes `blockchain` between registered users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
 
-> Status: Work-in-progress (Phase 3 complete, Phase-4 to begin)
+> Status: Work-in-progress (Phase-4)
 
 
 Note: In Phases 1 and 2 we simply create API's for testing the core blockchain functionality using REST API tool like [Postman](https://www.postman.com). 
@@ -77,7 +77,7 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 
 	![Post blockchain API example](git_images/blockchain.jpg)
 
-	Once we have Logged into the network successfuly and if we already have a copy of blockchain that was previously obtained from `GET /blockchain` API, we can send our JSON data containing the blockchain into the network. The network will start validating every individual block obtained from all users, and then updates the main blockchain with the latest one.
+	Once we have Logged into the network successfuly and have a copy of blockchain that was previously obtained from `GET /blockchain` API, we can send our JSON data containing blockchain into the network. The network will start validating every individual block obtained from all users, and then updates the main blockchain with the latest one.
 
 
 
@@ -88,9 +88,9 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 Last Update: [17 April, 2021](https://github.com/dpak11/blockchain/commit/f4af06eeb007fb8555da699779cf4fd32b99dfd9)
 
 
-### Phase-4 : Decentralisation + Amount Transfer
+### Phase-4 : Decentralisation(Full) + Transact
 
-> Status: Branch created. Coding to begin.
+Last Update: [21 April, 2021](https://github.com/dpak11/blockchain/tree/decentralised-transact)
 
 
 
