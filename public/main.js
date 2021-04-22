@@ -72,7 +72,7 @@ const submitTransactionData = async () => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: userTransaction.personName.value,
+      userid: userTransaction.UserID.value,
       amount: userTransaction.amount.value,
       token: sessionStorage.getItem("token")
     })
@@ -81,7 +81,7 @@ const submitTransactionData = async () => {
   if (response.status == "done") {
     userTransaction.reset();
     showMessage.html("#statusmsg", response.message);
-    document.getElementById("personName").focus();
+    document.getElementById("UserID").focus();
   } else {
     alert(response.status);
   }
@@ -117,11 +117,27 @@ const authSubmitForm = async (payload, restUrl) => {
 const showUsersList = (users) => {
   const allUsers = document.getElementById("allUsers");
   let html = ``;
+  const uid = document.getElementById("userIdTxt").getAttribute("uid");
   users.forEach(user => {
-    html += `<p>${user.user_id}</p>`;
+    const class_name = (uid === user.user_id) ? "disabled" : ""; 
+    html += `<p class="${class_name}">${user.user_id}</p>`;
   });
   allUsers.innerHTML=html;
-  showMessage.text("#total-users", "Total Connected Users: " + users.length); 
+  showMessage.text("#total-users", "Total Connected Users: " + users.length);
+  pickUserOnClick(allUsers.querySelectorAll("p"), uid);
+
+}
+
+const pickUserOnClick = (usersLink, id) => {  
+  usersLink.forEach(user => {
+    user.addEventListener("click", function(e){
+      const selected = e.target.textContent;
+      if(selected != id){
+        userTransaction["UserID"].value=selected
+      }
+    })
+  });
+
 }
 
 
@@ -144,7 +160,7 @@ function uploadBlockChainFile(file) {
 function insertTransactionFields() {
   const formDiv = document.createElement("div");
   const formElts = `<p>
-            <label for="personName">Name:</label><input type="text" id="personName">
+            <label for="UserID">User ID:</label><input type="text" id="UserID">
         </p>
         <p>
             <label for="amount">Amount:</label><input type="text" id="amount">
@@ -185,8 +201,9 @@ function initSocket() {
   socket.on("ConnectedUsers", (connUsers) => {       
     if(connUsers.mode == "new"){
       insertTransactionFields();
-      insertUploadButton();      
-      showMessage.text("#userIdTxt", "User ID: " + connUsers.id);
+      insertUploadButton();            
+      showMessage.text("#userIdTxt", "Welcome, " + connUsers.id + "(User ID)");
+      document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);
     }
     showUsersList(connUsers.total);
     

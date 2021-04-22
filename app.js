@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const MASTER_KEY = KEYS.masterKey;
 const DIFFICULTY = 3;
 const DUMMY_DB = []; // for testing
+const USERID_FORMAT = /^[0-9]{4}-[0-9]{4}$/;
 
 let autoID = 0;
 let miningActive = false;
@@ -46,6 +47,7 @@ IOsocket.on("connection", (socket) => {
           total: IOsocket.sockets.connected_bchain_users,
           mode:"new"
         });
+        
         if(IOsocket.sockets.mainBlockChain.get().length>1){
           socket.emit("latestBlockChain", {
             bchain: getBlockChain(),
@@ -179,9 +181,9 @@ app.get("/transactions/:userid", (req, res) => {
   getPendingTransactions(req.params.userid, res);
 });
 
-// Add new transaction Block into BlockChain with 'name' and 'amount' as transaction inputs
+// Add new transaction Block into BlockChain with 'userid' and 'amount' as transaction inputs
 app.post("/blockdata", (req, res) => {
-  const { name, amount, token } = req.body;
+  const { userid, amount, token } = req.body;
   const tokenUser = tokenManager.readToken(token);
   if (tokenUser.error) {
     return res.json({ status: tokenUser.error });
@@ -192,15 +194,18 @@ app.post("/blockdata", (req, res) => {
     return res.json({ status: "Sorry, Invalid User" });
   }
 
-  if (!name || !amount) {
-    return res.json({ status: "Required name, amount" });
+  if (!userid || !amount) {
+    return res.json({ status: "Required UserID, Amount" });
+  }
+  if(USERID_FORMAT.test(userid)===false){
+    return res.json({ status: "Enter a valid ID" });
   }
 
   autoID++;
   IOsocket.sockets.transactionList.push({
     id: autoID,
     userid: tokenUser.userid,
-    data: { name, amount }
+    data: { sender:tokenUser.userid, to: userid, amount }
   });
 
   return res.json({
@@ -263,8 +268,9 @@ function validateClientBlocks(newBlocks){
     }
 
     const userData = {
-      name: bchain.user_data.name,
-      amount: bchain.user_data.amount,
+      sender: bchain.user_data.sender,
+      to: bchain.user_data.to,
+      amount: bchain.user_data.amount
     };
     
     tempBlockChain.addBlock(bchain.index, userData, bchain.nonce, bchain.timestamp,bchain.hash,bchain.prevHash,false); // Mining is set to FALSE

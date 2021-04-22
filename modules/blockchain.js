@@ -8,7 +8,7 @@ function BlockChain(difficultyLevel, masterKey) {
     createGenesis();
     
     function createGenesis() {
-        const newdata = {name:"Genesis Block", amount: 100};
+        const newdata = {sender:"A", to:"B", amount: 100};
         const genesisBlock = Block(1, newdata, null, null, null, MASTER_KEY);
         genesisBlock.hasher();
         chain.push(genesisBlock);

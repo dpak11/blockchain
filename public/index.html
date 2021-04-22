@@ -7,7 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BlockChain User Page</title>
     <style>
-
+      body{
+        padding: 10px;
+      }
       #allUsers{
         display: flex;
         min-width: 300px;
@@ -23,14 +25,24 @@
       }
 
       #allUsers p:hover{
-        background-color: #eae2e4;
+        background-color: #05c4f6;
+        color: #fff;
+      }
+      #allUsers p.disabled:hover{
+        background:none
+      }
+      #allUsers p.disabled{
+        cursor: default;
+        color:#bb9d9d;
+        border-color: #bb9d9d;
       }
 
       #total-users{margin-bottom: 0;}
       form {
-        border: 1px solid gray;
-        padding: 10px;
+        border: 1px solid #c6b1b1;
+        padding: 20px;
         width: 500px;
+        background-color: #def1f3;
       }
 
       form p {
