@@ -204,6 +204,7 @@ function initSocket() {
       insertUploadButton();            
       showMessage.text("#userIdTxt", "Welcome, " + connUsers.id + "(User ID)");
       document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);
+      console.log("Balance Amount:"+connUsers.balanceAmt)
     }
     showUsersList(connUsers.total);
     

@@ -36,15 +36,17 @@ IOsocket.on("connection", (socket) => {
     const tokenUser = tokenManager.readToken(user.token);
     if (!tokenUser.error) {
       if (!isDuplicateUser(tokenUser.userid)) {
+
         IOsocket.sockets.connected_bchain_users.push({
           user_id: tokenUser.userid,
           sockedID: socket.id
         });
 
-               
+        const balanceAmt = DUMMY_DB.find((u) => u.id == tokenUser.userid).amt;       
         socket.emit("ConnectedUsers", {
           id: tokenUser.userid,
           total: IOsocket.sockets.connected_bchain_users,
+          balanceAmt,
           mode:"new"
         });
         
@@ -52,7 +54,6 @@ IOsocket.on("connection", (socket) => {
           socket.emit("latestBlockChain", {
             bchain: getBlockChain(),
             remaining: IOsocket.sockets.transactionList.length
-           // users: IOsocket.sockets.connected_bchain_users.length
           });
         }
         socket.broadcast.emit("ConnectedUsers", {
@@ -104,7 +105,7 @@ app.post("/register", (req, res) => {
   const hashedPass = SHA256(password).toString();
   const userID = NEW_USER.getID();
   const mytoken = tokenManager.createToken(userID);
-  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID });
+  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID, amt:100 });
   return res.json({
     status: "done",
     userID,
@@ -148,22 +149,6 @@ app.post("/checktoken", (req, res) => {
   return res.json({ status: "valid", user: tokenUser.userid });
 });
 
-function isDuplicateUser(userid) {
-  if (IOsocket.sockets.connected_bchain_users) {
-    const duplicate = IOsocket.sockets.connected_bchain_users.some((connected) => connected.user_id == userid);
-    if (duplicate) return true;
-  }
-  return false;
-}
-
-// Show all Blocks in a BlockChain
-function getBlockChain() {
-  const main_blockChain = IOsocket.sockets.mainBlockChain.get();
-  let blocks = main_blockChain.map((block) => {
-    return block.get();
-  });
-  return { blockchain: blocks };
-}
 
 app.get("/transactions/", (req, res) => {
   if (IOsocket.sockets.transactionList.length == 0) {
@@ -213,6 +198,24 @@ app.post("/blockdata", (req, res) => {
     message: `Your Transaction is added to Queue # ${autoID} <br>View all pending transactions <a href='http://localhost:3000/transactions/${tokenUser.userid}' target='_blank'>here</a>`,
   });
 });
+
+
+function isDuplicateUser(userid) {
+  if (IOsocket.sockets.connected_bchain_users) {
+    const duplicate = IOsocket.sockets.connected_bchain_users.some((connected) => connected.user_id == userid);
+    if (duplicate) return true;
+  }
+  return false;
+}
+
+// Show all Blocks in a BlockChain
+function getBlockChain() {
+  const main_blockChain = IOsocket.sockets.mainBlockChain.get();
+  let blocks = main_blockChain.map((block) => {
+    return block.get();
+  });
+  return { blockchain: blocks };
+}
 
 function validateToken(token) {
   if (!token) {
@@ -317,6 +320,7 @@ async function processTransactions() {
   );
   const new_block = await processBlockChain();
   const {index,user_data, nonce, timestamp, hash, prevHash} = new_block.updated;
+  updateBalanceAmount(user_data);
   IOsocket.sockets.mainBlockChain.addBlock(index, user_data, nonce,timestamp,hash, prevHash, false); // Mining is set to FALSE
   IOsocket.sockets.transactionList.splice(0, 1);
   latestHash = hash;
@@ -325,7 +329,6 @@ async function processTransactions() {
   IOsocket.sockets.emit("latestBlockChain", {
     bchain: getBlockChain(),
     remaining: IOsocket.sockets.transactionList.length
-    //users: IOsocket.sockets.connected_bchain_users.length,
   });
   if (IOsocket.sockets.transactionList.length == 0)
     console.log("All transactions done");
@@ -353,8 +356,15 @@ function processBlockChain() {
   });
 }
 
+const updateBalanceAmount =(transact) => {
+  const payer = DUMMY_DB.find((user) => user.id == transact.sender);
+  const payee = DUMMY_DB.find((user) => user.id == transact.to);
+  payer.amt-= Number(transact.amount);
+  payee.amt+=Number(transact.amount)
+}
+
 const NEW_USER = {
-  generate: function () {
+  generate() {
     let id = "";
     for (let i = 0; i < 8; i++) {
       id = `${id}${Math.floor(Math.random() * 10)}`;
@@ -362,9 +372,9 @@ const NEW_USER = {
     id = id.substr(0, 4) + "-" + id.substr(4);
     return id;
   },
-  getID: function () {
+  getID() {
     let newID = this.generate();
-    if (DUMMY_DB.some((user) => user.userid == newID)) {
+    if (DUMMY_DB.some((user) => user.id == newID)) {
       this.getID();
     } else {
       return newID;
