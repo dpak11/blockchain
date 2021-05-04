@@ -81,6 +81,7 @@ const submitTransactionData = async () => {
   if (response.status == "done") {
     userTransaction.reset();
     showMessage.html("#statusmsg", response.message);
+    showMessage.text("#pendings", "Pending Transactions: " + response.remaining);
     document.getElementById("UserID").focus();
   } else {
     alert(response.status);
@@ -190,8 +191,12 @@ function getDownloadLink() {
     const paraElt = document.createElement("p");
     paraElt.innerHTML = `<a id="bc_download" href="" download="blockchain">Download Blockchain</a>`;
     document.body.appendChild(paraElt);
+    paraElt.querySelector("a").addEventListener("click",(e) => {
+      downloadLink.classList.remove("show-dot");
+    })
     downloadLink = document.getElementById("bc_download");
   }
+  downloadLink.classList.add("show-dot");
   return downloadLink;
 }
 
@@ -217,8 +222,7 @@ function initSocket() {
     downloader.href = URL.createObjectURL(bcFile);
     downloader.download = "blockchain.text";
     showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);
-    //showMessage.text("#total-users", "Users: " + latest.users);
-    alert("Received New BlockChain.");
+    //alert("Received New BlockChain.");
   });
 
   socket.on("uploadRejected", (errorStatus) => {

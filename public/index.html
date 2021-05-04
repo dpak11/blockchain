@@ -84,7 +84,18 @@
         border-radius: 4px;
         text-align: center;
         text-decoration: none;
+        position: relative;
         cursor: pointer;
+      }
+      #bc_download.show-dot::after{
+        content: "";
+        position: absolute;
+        background: #e4cd0e;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        top: -5px;
+        right: -1px;
       }
 
       #uploadFile:focus + label,
