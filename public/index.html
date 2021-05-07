@@ -7,37 +7,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BlockChain User Page</title>
     <style>
-      body{
+      body {
         padding: 10px;
       }
-      #allUsers{
+      #allUsers {
         display: flex;
         min-width: 300px;
-         width: 40%;
+        width: 40%;
       }
-      #allUsers p{
+      #allUsers p {
         border: solid 1px gray;
-       padding: 2px 8px;
+        padding: 2px 8px;
         margin-right: 5px;
         margin-top: 0;
         border-radius: 4px;
         cursor: pointer;
       }
 
-      #allUsers p:hover{
+      #allUsers p:hover {
         background-color: #05c4f6;
         color: #fff;
       }
-      #allUsers p.disabled:hover{
-        background:none
+      #allUsers p.disabled:hover {
+        background: none;
       }
-      #allUsers p.disabled{
+      #allUsers p.disabled {
         cursor: default;
-        color:#bb9d9d;
+        color: #bb9d9d;
         border-color: #bb9d9d;
       }
 
-      #total-users{margin-bottom: 0;}
+      #total-users {
+        margin-bottom: 0;
+      }
       form {
         border: 1px solid #c6b1b1;
         padding: 20px;
@@ -51,6 +53,13 @@
       form p label,
       form p input {
         width: 150px;
+      }
+
+      #balance-amt {
+        justify-content: flex-end;
+        padding-top: 0;
+        margin-top: 0;
+        font-weight: bold;
       }
 
       #userIdTxt {
@@ -87,7 +96,7 @@
         position: relative;
         cursor: pointer;
       }
-      #bc_download.show-dot::after{
+      #bc_download.show-dot::after {
         content: "";
         position: absolute;
         background: #e4cd0e;
@@ -117,22 +126,31 @@
   <body>
     <p class="status-head">
       <span id="userIdTxt"></span>
-     
+
       <span id="pendings"></span>
     </p>
     <p id="total-users"></p>
-    <div id="allUsers">
-      
-    </div>
+    <div id="allUsers"></div>
     <form id="authenticateUser">
       <p>
-        <label for="UserEmail">User Email:</label><input type="text" id="UserEmail" />
+        <label for="UserEmail">User Email:</label
+        ><input type="text" id="UserEmail" />
       </p>
       <p>
-        <label for="UserPswd">Password:</label><input type="password" id="UserPswd" />
+        <label for="UserPswd">Password:</label
+        ><input type="password" id="UserPswd" />
       </p>
-      <input type="radio" id="register" value="register" checked name="logType" /><label for="register">Register</label>
-      <input type="radio" id="signin" value="signin" name="logType" /><label for="signin">Login</label>
+      <input
+        type="radio"
+        id="register"
+        value="register"
+        checked
+        name="logType"
+      /><label for="register">Register</label>
+      <input type="radio" id="signin" value="signin" name="logType" /><label
+        for="signin"
+        >Login</label
+      >
       <br /><br />
       <input type="submit" value="Submit" />
     </form>

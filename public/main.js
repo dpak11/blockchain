@@ -160,7 +160,7 @@ function uploadBlockChainFile(file) {
 
 function insertTransactionFields() {
   const formDiv = document.createElement("div");
-  const formElts = `<p>
+  const formElts = `<p id="balance-amt"></p><p>
             <label for="UserID">User ID:</label><input type="text" id="UserID">
         </p>
         <p>
@@ -208,8 +208,8 @@ function initSocket() {
       insertTransactionFields();
       insertUploadButton();            
       showMessage.text("#userIdTxt", "Welcome, " + connUsers.id + "(User ID)");
-      document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);
-      console.log("Balance Amount:"+connUsers.balanceAmt)
+      showMessage.text("#balance-amt", "Balance Amount: "+connUsers.balanceAmt);
+      document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);      
     }
     showUsersList(connUsers.total);
     

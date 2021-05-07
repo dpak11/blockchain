@@ -325,16 +325,16 @@ async function processTransactions() {
     "transaction processing for Queue ID#" + IOsocket.sockets.transactionList[0].id
   );
   const new_block = await processBlockChain();
-  const {index,user_data, nonce, timestamp, hash, prevHash} = new_block.updated;
-  updateBalanceAmount(user_data);
+  const {index,user_data, nonce, timestamp, hash, prevHash} = new_block.updated;  
   IOsocket.sockets.mainBlockChain.addBlock(index, user_data, nonce,timestamp,hash, prevHash, false); // Mining is set to FALSE
   IOsocket.sockets.transactionList.splice(0, 1);
   latestHash = hash;
   miningActive = false;
   console.log("Block Added");
+  updateBalanceAmount(user_data);  
   IOsocket.sockets.emit("latestBlockChain", {
     bchain: getBlockChain(),
-    remaining: IOsocket.sockets.transactionList.length
+    remaining: IOsocket.sockets.transactionList.length    
   });
   if (IOsocket.sockets.transactionList.length == 0)
     console.log("All transactions done");
