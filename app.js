@@ -175,21 +175,22 @@ app.post("/blockdata", (req, res) => {
   }
   if(isNaN(amount)) return res.json({ status: "Amount Invalid" });
 
-  if (!DUMMY_DB.some((user) => user.id === tokenUser.userid)) {
-    return res.json({ status: "Sorry, Invalid User" });
-  }  
+  const thisUser = DUMMY_DB.find((user) => user.id === tokenUser.userid);
+  if(!thisUser) return res.json({ status: "Sorry, Invalid User" });  
 
   if (!userid || !amount) {
     return res.json({ status: "Required UserID, Amount" });
   }
+
+  
   if(USERID_FORMAT.test(userid)===false){
     return res.json({ status: "Enter a valid ID" });
-  }
+  }  
 
   if(!DUMMY_DB.some((user) => user.id === userid)){
     return res.json({ status: "User ID does not exist" }); 
   }
-  
+  if(thisUser.amt - amount < 0) return res.json({ status: "Sorry, You have insufficient Balance" });
 
   autoID++;
   IOsocket.sockets.transactionList.push({
