@@ -207,7 +207,7 @@ function initSocket() {
     if(connUsers.mode == "new"){
       insertTransactionFields();
       insertUploadButton();            
-      showMessage.text("#userIdTxt", "Welcome, " + connUsers.id + "(User ID)");
+      showMessage.text("#userIdTxt", "Welcome, User(" + connUsers.id + ")");
       showMessage.text("#balance-amt", "Balance Amount: "+connUsers.balanceAmt);
       document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);      
     }
@@ -221,8 +221,7 @@ function initSocket() {
     const downloader = getDownloadLink();
     downloader.href = URL.createObjectURL(bcFile);
     downloader.download = "blockchain.text";
-    showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);
-    //alert("Received New BlockChain.");
+    showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);   
   });
 
   socket.on("uploadRejected", (errorStatus) => {

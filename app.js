@@ -105,7 +105,7 @@ app.post("/register", (req, res) => {
   const hashedPass = SHA256(password).toString();
   const userID = NEW_USER.getID();
   const mytoken = tokenManager.createToken(userID);
-  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID, amt:100 });
+  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID, amt:5000 });
   return res.json({
     status: "done",
     userID,
