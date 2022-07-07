@@ -4,7 +4,7 @@ const authenticateUser = document.querySelector("#authenticateUser");
 const userTransaction = document.querySelector("#userTransaction");
 const labelText = document.querySelector("label[for=UserEmail]");
 let socket = null;
-
+let user_ID = "";
 
 registerBtn.addEventListener("click", function (e) {
   labelText.textContent = "User Email:";
@@ -68,6 +68,10 @@ const checkTokenValidity = async () => {
 };
 
 const submitTransactionData = async () => {
+  if(user_ID === userTransaction.UserID.value.trim()){
+    userTransaction.UserID.value = ""
+    return;
+  }
   const submitData = await fetch("../blockdata", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -100,11 +104,14 @@ const authSubmitForm = async (payload, restUrl) => {
     let txtMsg = "";
     if (restUrl.includes("register")) {
       txtMsg = `Generated User ID is: ${response.userID}.  Token saved successfuly!`;
+      user_ID = response.userID;
     } else {
       txtMsg = "You have successfuly logged In";
     }
-    
-    showMessage.text("#statusmsg", txtMsg);
+    showMessage.text("#statusmsg", txtMsg)
+    setTimeout(()=>{
+      showMessage.text("#statusmsg", "")
+    },3000);
     authenticateUser.remove();
     initSocket();
   } else if (response.status == "multiple_login") {
