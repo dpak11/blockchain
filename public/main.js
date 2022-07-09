@@ -86,6 +86,7 @@ const submitTransactionData = async () => {
     userTransaction.reset();
     showMessage.html("#statusmsg", response.message);
     showMessage.text("#pendings", "Pending Transactions: " + response.remaining);
+    showMessage.html("#balance-amt", "Balance Amount: "+response.balance);
     document.getElementById("UserID").focus();
   } else {
     alert(response.status);
@@ -167,7 +168,7 @@ function uploadBlockChainFile(file) {
 
 function insertTransactionFields() {
   const formDiv = document.createElement("div");
-  const formElts = `<p id="balance-amt"></p><p>
+  const formElts = `<p>
             <label for="UserID">User ID:</label><input type="text" id="UserID">
         </p>
         <p>
@@ -214,7 +215,7 @@ function initSocket() {
     if(connUsers.mode == "new"){
       insertTransactionFields();
       insertUploadButton();            
-      showMessage.text("#userIdTxt", "Welcome, User(" + connUsers.id + ")");
+      showMessage.text("#userIdTxt", "Welcome, " + connUsers.id);
       showMessage.text("#balance-amt", "Balance Amount: "+connUsers.balanceAmt);
       document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);      
     }

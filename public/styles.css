@@ -1,5 +1,8 @@
 body {
   padding: 10px;
+  width: 50%;
+  margin: 10px auto;
+  border: 1px solid #000;
 }
 #allUsers {
   display: flex;
@@ -34,7 +37,7 @@ body {
 form {
   border: 1px solid #c6b1b1;
   padding: 20px;
-  width: 500px;
+  /* width: 500px; */
   background-color: #def1f3;
 }
 
@@ -60,7 +63,7 @@ form p input {
 .status-head {
   display: flex;
   justify-content: space-between;
-  width: 30%;
+  /* width: 30%; */
   min-width: 450px;
   margin-bottom: 0;
 }
@@ -90,12 +93,13 @@ form p input {
 #bc_download.show-dot::after {
   content: "";
   position: absolute;
-  background: #e4cd0e;
+  background: greenyellow;
   border-radius: 50%;
-  width: 10px;
-  height: 10px;
-  top: -5px;
-  right: -1px;
+  width: 13px;
+  height: 13px;
+  top: -7px;
+  right: -5px;
+  border: 1px solid #5d6b9d;
 }
 
 #uploadFile:focus + label,

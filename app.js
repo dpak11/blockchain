@@ -201,6 +201,7 @@ app.post("/blockdata", (req, res) => {
 
   return res.json({
     status: "done",
+    balance: thisUser.amt - amount,
     remaining: IOsocket.sockets.transactionList.length,
     message: `Your Transaction is added to Queue # ${autoID} <br>View all pending transactions <a href='http://localhost:3000/transactions/${tokenUser.userid}' target='_blank'>here</a>`,
   });
