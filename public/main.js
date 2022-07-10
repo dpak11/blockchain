@@ -4,7 +4,6 @@ const authenticateUser = document.querySelector("#authenticateUser");
 const userTransaction = document.querySelector("#userTransaction");
 const labelText = document.querySelector("label[for=UserEmail]");
 let socket = null;
-let user_ID = "";
 
 registerBtn.addEventListener("click", function (e) {
   labelText.textContent = "User Email:";
@@ -68,6 +67,7 @@ const checkTokenValidity = async () => {
 };
 
 const submitTransactionData = async () => {
+  const user_ID = sessionStorage.getItem("userid");
   if(user_ID === userTransaction.UserID.value.trim()){
     userTransaction.UserID.value = ""
     return;
@@ -105,7 +105,7 @@ const authSubmitForm = async (payload, restUrl) => {
     let txtMsg = "";
     if (restUrl.includes("register")) {
       txtMsg = `Generated User ID is: ${response.userID}.  Token saved successfuly!`;
-      user_ID = response.userID;
+      sessionStorage.setItem("userid",response.userID);
     } else {
       txtMsg = "You have successfuly logged In";
     }
@@ -232,7 +232,7 @@ function initSocket() {
     downloader.download = "blockchain.text";
     showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);
     if(latest.receive_id){
-      if(user_ID == latest.receive_id) {
+      if(sessionStorage.getItem("userid") == latest.receive_id) {
         location.reload()
       }  
     }   

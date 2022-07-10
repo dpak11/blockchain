@@ -17,10 +17,22 @@ const MASTER_KEY = KEYS.masterKey;
 const DIFFICULTY = 3;
 const DUMMY_DB = []; // for testing
 const USERID_FORMAT = /^[0-9]{4}-[0-9]{4}$/;
+const INITIAL_AMOUNT =  5000;
 
 let autoID = 0;
 let miningActive = false;
 let latestHash = "";
+
+const NEW_USER = {
+  getID() {
+    let id = "";
+    for (let i = 0; i < 8; i++) {
+      id = `${id}${Math.floor(Math.random() * 10)}`;
+    }
+    id = id.substring(0, 4) + "-" + id.substring(4);
+    return id;
+  }
+};
 
 IOsocket.on("connection", (socket) => {
   console.log("New socket connection", socket.id);
@@ -105,7 +117,7 @@ app.post("/register", (req, res) => {
   const hashedPass = SHA256(password).toString();
   const userID = NEW_USER.getID();
   const mytoken = tokenManager.createToken(userID);
-  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID, amt:5000 });
+  DUMMY_DB.push({ email: email, pass: hashedPass, id: userID, amt:INITIAL_AMOUNT });
   return res.json({
     status: "done",
     userID,
@@ -372,24 +384,7 @@ const updateBalanceAmount =(transact) => {
   payee.amt+=Number(transact.amount)
 }
 
-const NEW_USER = {
-  generate() {
-    let id = "";
-    for (let i = 0; i < 8; i++) {
-      id = `${id}${Math.floor(Math.random() * 10)}`;
-    }
-    id = id.substr(0, 4) + "-" + id.substr(4);
-    return id;
-  },
-  getID() {
-    let newID = this.generate();
-    if (DUMMY_DB.some((user) => user.id == newID)) {
-      this.getID();
-    } else {
-      return newID;
-    }
-  },
-};
+
 
 let queueInterval = setInterval(function () {
   if (IOsocket.sockets.transactionList) {
