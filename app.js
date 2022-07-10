@@ -336,6 +336,7 @@ async function processTransactions() {
   updateBalanceAmount(user_data);  
   IOsocket.sockets.emit("latestBlockChain", {
     bchain: getBlockChain(),
+    receive_id:user_data.to,
     remaining: IOsocket.sockets.transactionList.length    
   });
   if (IOsocket.sockets.transactionList.length == 0)

@@ -178,6 +178,7 @@ function insertTransactionFields() {
         <input type="submit" value="Submit">`;
   formDiv.innerHTML = formElts;
   userTransaction.appendChild(formDiv);
+  userTransaction.style.display = "block"
 }
 
 function insertUploadButton() {
@@ -229,7 +230,12 @@ function initSocket() {
     const downloader = getDownloadLink();
     downloader.href = URL.createObjectURL(bcFile);
     downloader.download = "blockchain.text";
-    showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);   
+    showMessage.text("#pendings", "Pending Transactions: " + latest.remaining);
+    if(latest.receive_id){
+      if(user_ID == latest.receive_id) {
+        location.reload()
+      }  
+    }   
   });
 
   socket.on("uploadRejected", (errorStatus) => {

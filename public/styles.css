@@ -2,7 +2,8 @@ body {
   padding: 10px;
   width: 50%;
   margin: 10px auto;
-  border: 1px solid #000;
+  border: thin solid #c4acac;
+  border-radius: 5px;
 }
 #allUsers {
   display: flex;
@@ -35,10 +36,9 @@ body {
   margin-bottom: 0;
 }
 form {
-  border: 1px solid #c6b1b1;
+  border: 3px solid #e4cfcf;
   padding: 20px;
-  /* width: 500px; */
-  background-color: #def1f3;
+  background-color: #d7fbff;
 }
 
 form p {
@@ -49,11 +49,16 @@ form p input {
   width: 150px;
 }
 
+#userTransaction{
+  display: none;
+}
+
 #balance-amt {
   justify-content: flex-end;
   padding-top: 0;
   margin-top: 0;
-  font-weight: bold;
+  color: #85868e;
+  text-decoration: underline;
 }
 
 #userIdTxt {
@@ -95,11 +100,14 @@ form p input {
   position: absolute;
   background: greenyellow;
   border-radius: 50%;
-  width: 13px;
-  height: 13px;
-  top: -7px;
-  right: -5px;
-  border: 1px solid #5d6b9d;
+  width: 10px;
+  height: 10px;
+  top: -5px;
+  right: -1px;
+  animation-name: blinker;
+  animation-iteration-count: infinite;
+  animation-duration: .5s;
+  animation-direction: alternate;
 }
 
 #uploadFile:focus + label,
@@ -120,4 +128,13 @@ input[type="submit"] {
   border-radius: 3px;
   letter-spacing: 1.5px;
   cursor: pointer;
+}
+
+@keyframes blinker{
+  from{
+    opacity: .3      
+  }
+  to{
+    opacity: 1
+  }
 }
