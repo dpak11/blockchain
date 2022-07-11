@@ -1,16 +1,16 @@
 # Blockchain
 
 
-Simple web application that distributes `blockchain` between registered users, and manages transaction records, thereby eliminating the need of a central Server for storing Blockchain, transaction details in any form.
+Simple web application that distributes `blockchain` between registered users and manages transaction records, eliminating the need of a centralised Server for storing Blockchain and transaction details.
 
 > Status: Work-in-progress (Phase-4)
 
 
-Note: In Phases 1 and 2 we simply create API's for testing the core blockchain functionality using REST API tool like [Postman](https://www.postman.com). 
+Note: In Phases 1 and 2 we create API's for testing the core blockchain functionality using REST API tool like [Postman](https://www.postman.com). 
 
-Phase-3 will contain a basic UI that will allow user to submit data into blockchain through browser. We start implementing Decentralisation in this phase where registered users can download and upload validated blockchains into the network.
+Phase-3 will contain a basic UI that will allow users to submit data into blockchain through web browser. We start implementing Decentralisation in this phase where registered users can download and upload validated blockchains into the network.
 
-Phase-4 is where we fill up the remaining parts of decentralisation and allow manual selection of individual user IDs to transfer amount between users. 
+Phase-4 is where we fill up the remaining parts of decentralisation and allow manual selection of individual user IDs to transfer the amount between registered users. 
 
 
 ### Phase-1 : 
@@ -22,7 +22,7 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 
 	![User Register API example](git_images/register.jpg)
 
-	User input should contain email address and password. In response, you should receive an unique `user ID` along with a token
+	User input should contain email address and password. In response, you will receive an unique `user ID` along with a token
 
 
 - API for User LogIn:
@@ -33,11 +33,11 @@ Phase-4 is where we fill up the remaining parts of decentralisation and allow ma
 	![User Login API example](git_images/login.jpg)
 
 	
-	User input will contain User ID and password. This is the User ID that was generated during email registeration process.
+	User input will contain User ID and password. This is the User ID that was generated during the User Registeration process.
 	If Login verification is successful, you will receive a token
 
 
-- API to list all pending transactions waiting to be mined sequentially.
+- API to list all pending transactions waiting in queue (to be mined sequentially).
 
 	To view all pending transactions for a particular userID:
 
