@@ -57,7 +57,7 @@ IOsocket.on("connection", (socket) => {
         const balanceAmt = DUMMY_DB.find((u) => u.id == tokenUser.userid).amt;       
         socket.emit("ConnectedUsers", {
           id: tokenUser.userid,
-          total: IOsocket.sockets.connected_bchain_users,
+          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
           balanceAmt,
           mode:"new"
         });
@@ -69,7 +69,7 @@ IOsocket.on("connection", (socket) => {
           });
         }
         socket.broadcast.emit("ConnectedUsers", {
-          total: IOsocket.sockets.connected_bchain_users,
+          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
           mode:"update"
         });        
         console.log(IOsocket.sockets.connected_bchain_users);
@@ -97,7 +97,7 @@ IOsocket.on("connection", (socket) => {
       (conUser) => conUser.sockedID !== socket.id
     );
     socket.broadcast.emit("ConnectedUsers", {
-      total: IOsocket.sockets.connected_bchain_users,
+      total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
       mode:"update"
     }); 
     console.log("disconnected:" + socket.id);
