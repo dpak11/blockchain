@@ -127,9 +127,9 @@ const showUsersList = (users) => {
   const allUsers = document.getElementById("allUsers");
   let html = ``;
   const uid = document.getElementById("userIdTxt").getAttribute("uid");
-  users.forEach(user => {
-    const class_name = (uid === user.user_id) ? "disabled" : ""; 
-    html += `<p class="${class_name}">${user.user_id}</p>`;
+  users.forEach(userid => {
+    const class_name = (uid == userid) ? "disabled" : ""; 
+    html += `<p class="${class_name}">${userid}</p>`;
   });
   allUsers.innerHTML=html;
   showMessage.text("#total-users", "Total Connected Users: " + users.length);
