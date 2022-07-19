@@ -48,6 +48,7 @@ IOsocket.on("connection", (socket) => {
     const tokenUser = tokenManager.readToken(user.token);
     if (!tokenUser.error) {
       if (!isDuplicateUser(tokenUser.userid)) {
+
         IOsocket.sockets.connected_bchain_users.push({
           user_id: tokenUser.userid,
           sockedID: socket.id
@@ -56,7 +57,7 @@ IOsocket.on("connection", (socket) => {
         const balanceAmt = DUMMY_DB.find((u) => u.id == tokenUser.userid).amt;       
         socket.emit("ConnectedUsers", {
           id: tokenUser.userid,
-          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+          total: IOsocket.sockets.connected_bchain_users,
           balanceAmt,
           mode:"new"
         });
@@ -68,7 +69,7 @@ IOsocket.on("connection", (socket) => {
           });
         }
         socket.broadcast.emit("ConnectedUsers", {
-          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+          total: IOsocket.sockets.connected_bchain_users,
           mode:"update"
         });        
         console.log(IOsocket.sockets.connected_bchain_users);
@@ -96,7 +97,7 @@ IOsocket.on("connection", (socket) => {
       (conUser) => conUser.sockedID !== socket.id
     );
     socket.broadcast.emit("ConnectedUsers", {
-      total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+      total: IOsocket.sockets.connected_bchain_users,
       mode:"update"
     }); 
     console.log("disconnected:" + socket.id);
