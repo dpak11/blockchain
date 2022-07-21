@@ -31,7 +31,7 @@ authenticateUser.addEventListener("submit", function (e) {
     restUrl = "../register";
   }
   if (email.trim() !== "" && password.trim() !== "") {
-    authSubmitForm(data, restUrl);
+    userAuthentication(data, restUrl);
   } else {
     alert("Field(s) are empty");
   }
@@ -93,7 +93,7 @@ const submitTransactionData = async () => {
   }
 }
 
-const authSubmitForm = async (payload, restUrl) => {
+const userAuthentication = async (payload, restUrl) => {
   const authSubmit = await fetch(restUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -105,7 +105,6 @@ const authSubmitForm = async (payload, restUrl) => {
     let txtMsg = "";
     if (restUrl.includes("register")) {
       txtMsg = `Generated User ID is: ${response.userID}.  Token saved successfuly!`;
-      sessionStorage.setItem("userid",response.userID);
     } else {
       txtMsg = "You have successfuly logged In";
     }
@@ -126,7 +125,7 @@ const authSubmitForm = async (payload, restUrl) => {
 const showUsersList = (users) => {
   const allUsers = document.getElementById("allUsers");
   let html = ``;
-  const uid = document.getElementById("userIdTxt").getAttribute("uid");
+  const uid = sessionStorage.getItem("userid");
   users.forEach(userid => {
     const class_name = (uid === userid) ? "disabled" : ""; 
     html += `<p class="${class_name}">${userid}</p>`;
@@ -218,7 +217,7 @@ function initSocket() {
       insertUploadButton();            
       showMessage.text("#userIdTxt", "Welcome, " + connUsers.id);
       showMessage.text("#balance-amt", "Balance Amount: "+connUsers.balanceAmt);
-      document.getElementById("userIdTxt").setAttribute("uid",connUsers.id);      
+      sessionStorage.setItem("userid",connUsers.id);      
     }
     showUsersList(connUsers.total);
     
