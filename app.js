@@ -18,8 +18,10 @@ const DIFFICULTY = 3;
 const DUMMY_DB = []; // for testing
 const USERID_FORMAT = /^[0-9]{4}-[0-9]{4}$/;
 const INITIAL_AMOUNT =  5000;
+const disconnectSockets = [];
 
-let autoID = 0;
+let transactID = 1;
+let autoNum = 0;
 let miningActive = false;
 let latestHash = "";
 
@@ -33,6 +35,11 @@ const NEW_USER = {
     return id;
   }
 };
+
+const sortedUserIDs = () => {
+	let list = [...IOsocket.sockets.connected_bchain_users].sort((a,b) => a.autoNum - b.autoNum);
+	return list.map(user => user.user_id)
+}
 
 IOsocket.on("connection", (socket) => {
   console.log("New socket connection", socket.id);
@@ -48,16 +55,19 @@ IOsocket.on("connection", (socket) => {
     const tokenUser = tokenManager.readToken(user.token);
     if (!tokenUser.error) {
       if (!isDuplicateUser(tokenUser.userid)) {
-
-        IOsocket.sockets.connected_bchain_users.push({
-          user_id: tokenUser.userid,
-          sockedID: socket.id
-        });
-
+      	let userInfo = {user_id: tokenUser.userid, sockedID: socket.id}
+      	let reloadedUser = disconnectSockets.find(user => user.userid == tokenUser.userid);
+      	if(reloadedUser){
+      		console.log("Reloaded User: "+tokenUser.userid, reloadedUser.autoNum)
+      		userInfo.autoNum = reloadedUser.autoNum
+      	}else{
+      		userInfo.autoNum = autoNum++
+      	}
+        IOsocket.sockets.connected_bchain_users.push(userInfo);
         const balanceAmt = DUMMY_DB.find((u) => u.id == tokenUser.userid).amt;       
         socket.emit("ConnectedUsers", {
           id: tokenUser.userid,
-          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+          total: sortedUserIDs(),
           balanceAmt,
           mode:"new"
         });
@@ -69,7 +79,7 @@ IOsocket.on("connection", (socket) => {
           });
         }
         socket.broadcast.emit("ConnectedUsers", {
-          total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+          total: sortedUserIDs(),
           mode:"update"
         });        
         console.log(IOsocket.sockets.connected_bchain_users);
@@ -86,21 +96,25 @@ IOsocket.on("connection", (socket) => {
           socket.emit("uploadRejected", blockchainUpdate);
         } else {
           console.log(blockchainUpdate);
-         // socket.broadcast.emit("shareBlockChain", getBlockChain());
         }
       }
     }
   });
 
   socket.on("disconnect", () => {
-    IOsocket.sockets.connected_bchain_users = IOsocket.sockets.connected_bchain_users.filter(
-      (conUser) => conUser.sockedID !== socket.id
+    IOsocket.sockets.connected_bchain_users = IOsocket.sockets.connected_bchain_users.filter((conUser) => {
+      	if(conUser.sockedID !== socket.id){      		 
+      		return true
+      	}
+      	disconnectSockets.push({socket:socket.id, userid:conUser.user_id, autoNum:conUser.autoNum});
+      	return false
+      }
     );
     socket.broadcast.emit("ConnectedUsers", {
-      total: IOsocket.sockets.connected_bchain_users.map(user => user.user_id),
+      total: sortedUserIDs(),
       mode:"update"
     }); 
-    console.log("disconnected:" + socket.id);
+    console.log("disconnected:" + socket.id, disconnectSockets);
   });
 });
 
@@ -154,10 +168,7 @@ app.post("/checktoken", (req, res) => {
   }
   console.log("Connected Users:");
   console.log(IOsocket.sockets.connected_bchain_users);
-  const tokenUser = tokenManager.readToken(req.body.token);
-  /*if (isDuplicateUser(tokenUser.userid)) {
-    return res.json({ status: "multiple_login" });
-  }*/
+  const tokenUser = tokenManager.readToken(req.body.token);  
   return res.json({ status: "valid", user: tokenUser.userid });
 });
 
@@ -204,9 +215,9 @@ app.post("/blockdata", (req, res) => {
   }
   if(thisUser.amt - amount < 0) return res.json({ status: "Sorry, You have insufficient Balance" });
 
-  autoID++;
+  transactID++;
   IOsocket.sockets.transactionList.push({
-    id: autoID,
+    id: transactID,
     userid: tokenUser.userid,
     data: { sender:tokenUser.userid, to: userid, amount }
   });
@@ -215,7 +226,7 @@ app.post("/blockdata", (req, res) => {
     status: "done",
     balance: thisUser.amt - amount,
     remaining: IOsocket.sockets.transactionList.length,
-    message: `Your Transaction is added to Queue # ${autoID} <br>View all pending transactions <a href='http://localhost:3000/transactions/${tokenUser.userid}' target='_blank'>here</a>`,
+    message: `Your Transaction is added to Queue # ${transactID} <br>View all pending transactions <a href='http://localhost:3000/transactions/${tokenUser.userid}' target='_blank'>here</a>`,
   });
 });
 
